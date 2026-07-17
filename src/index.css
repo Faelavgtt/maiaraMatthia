@@ -1,0 +1,434 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 14 45% 76%;
+    --foreground: 24 40% 28%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 40% 28%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 75% 31%;
+
+    --primary: 35 70% 66%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 31 72% 92%;
+    --secondary-foreground: 24 40% 28%;
+
+    --tertiary: 139 18% 61%;
+    --tertiary-foreground: 0 0% 100%;
+
+    --muted: 139 18% 61%;
+    --muted-foreground: 24 30% 40%;
+
+    --accent: 12 70% 82%;
+    --accent-foreground: 24 40% 28%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 28 41% 84%;
+    --input: 31 72% 92%;
+    --ring: 35 70% 66%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 25 75% 31%;
+    --sidebar-primary: 25 75% 31%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 14 45% 68%;
+    --sidebar-accent-foreground: 25 75% 31%;
+    --sidebar-border: 25 43% 76%;
+    --sidebar-ring: 27 54% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans font-light;
+    background-image:
+      radial-gradient(circle at 18% 12%, rgba(238, 191, 97, 0.10), transparent 28%),
+      radial-gradient(circle at 82% 18%, rgba(147, 177, 151, 0.10), transparent 24%),
+      linear-gradient(180deg, #ddb8a6 0%, #ddb8a6 100%);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-medium py-2 px-4 rounded transition-transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground font-medium py-2 px-4 rounded transition-transform hover:scale-105;
+  }
+  
+  .segment-card {
+    @apply bg-white p-4 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer;
+    @apply transition-all duration-300 hover:-translate-y-0.5 border border-[#ddb8a6]/70 shadow-[0_12px_30px_rgba(0,0,0,0.07)];
+  }
+
+  .background-glow {
+    @apply pointer-events-none fixed h-[1000px] w-[1500px] rounded-full; 
+    background: hsl(var(--primary) / 0.1); 
+    filter: blur(100px); 
+    top: -500px; 
+    right: -500px; 
+    z-index: 0; 
+  }
+
+  .top-header {
+    @apply bg-primary text-primary-foreground p-3;
+  }
+
+  .section-shell {
+    @apply px-5 py-16 md:py-20;
+  }
+
+  .soft-card {
+    @apply rounded-xl border border-[#ddb8a6]/70 bg-white shadow-[0_16px_45px_rgba(0,0,0,0.07)];
+  }
+
+  .fine-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-[#ddb8a6] px-5 font-sans font-light transition-transform hover:-translate-y-0.5;
+  }
+
+  .eyebrow {
+    @apply font-sans text-xs font-normal uppercase tracking-[0.22em] text-[#7d876d];
+  }
+}
+
+.main-container {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes studio-slide {
+  from {
+    opacity: 0;
+    transform: translateX(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes hero-card {
+  from {
+    opacity: 0;
+    transform: rotate(-2deg) translateY(22px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(1deg) translateY(0) scale(1);
+  }
+}
+
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes dot-pop {
+  0%, 72% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-float {
+  0%, 100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(5deg);
+  }
+}
+
+@keyframes hero-float-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(12deg);
+  }
+  50% {
+    transform: translateY(12px) rotate(2deg);
+  }
+}
+
+@keyframes hero-wiggle {
+  0%, 100% {
+    transform: rotate(-8deg) translateX(0);
+  }
+  50% {
+    transform: rotate(-3deg) translateX(8px);
+  }
+}
+
+@keyframes hero-sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.18) rotate(12deg);
+  }
+}
+
+@keyframes garden-sway {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--garden-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(-5px) rotate(calc(var(--garden-rotate, 0deg) + 2deg));
+  }
+}
+
+@keyframes garden-sway-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--garden-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(4px) rotate(calc(var(--garden-rotate, 0deg) - 2deg));
+  }
+}
+
+@keyframes garden-leaf-rest {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--garden-rotate, -18deg));
+  }
+  50% {
+    transform: translateY(-3px) rotate(calc(var(--garden-rotate, -18deg) + 2deg));
+  }
+}
+
+@keyframes garden-bee-path {
+  0% {
+    transform: translate3d(-12vw, 0, 0);
+  }
+  100% {
+    transform: translate3d(112vw, 0, 0);
+  }
+}
+
+@keyframes garden-bee-hover {
+  0%, 100% {
+    transform: translateY(18px) rotate(-5deg) scale(1);
+  }
+  25% {
+    transform: translateY(-30px) rotate(5deg) scale(1.02);
+  }
+  50% {
+    transform: translateY(38px) rotate(-3deg) scale(0.99);
+  }
+  75% {
+    transform: translateY(-20px) rotate(6deg) scale(1.01);
+  }
+}
+
+@keyframes garden-insect-path {
+  0% {
+    transform: translate3d(112vw, 0, 0);
+  }
+  100% {
+    transform: translate3d(-12vw, 0, 0);
+  }
+}
+
+@keyframes garden-insect-hover {
+  0%, 100% {
+    transform: translateY(-8px) rotate(8deg) scale(1);
+  }
+  25% {
+    transform: translateY(44px) rotate(-5deg) scale(0.99);
+  }
+  50% {
+    transform: translateY(-36px) rotate(12deg) scale(1.02);
+  }
+  75% {
+    transform: translateY(30px) rotate(-3deg) scale(1);
+  }
+}
+
+.hero-rise {
+  animation: hero-rise 720ms ease-out both;
+}
+
+.hero-rise:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.hero-rise:nth-child(3) {
+  animation-delay: 220ms;
+}
+
+.hero-rise:nth-child(4) {
+  animation-delay: 320ms;
+}
+
+.hero-card {
+  animation: hero-card 900ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.hero-drawing .draw-line {
+  stroke: #8b4114;
+  stroke-width: 2.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 700;
+  stroke-dashoffset: 700;
+  animation: draw-line 1.2s ease forwards;
+}
+
+.hero-drawing .white-line {
+  stroke: #8b4114;
+  stroke-width: 2.5;
+}
+
+.hero-drawing .white-dot {
+  fill: #ffffff;
+}
+
+.hero-drawing .accent {
+  stroke: #c68043;
+}
+
+.hero-drawing .accent-green {
+  stroke: #7d876d;
+}
+
+.hero-drawing .draw-line-1 { animation-delay: 400ms; }
+.hero-drawing .draw-line-2 { animation-delay: 950ms; }
+.hero-drawing .draw-line-3 { animation-delay: 1050ms; }
+.hero-drawing .draw-line-4 { animation-delay: 1250ms; }
+.hero-drawing .draw-line-5 { animation-delay: 1450ms; }
+.hero-drawing .draw-line-6 { animation-delay: 1600ms; }
+.hero-drawing .draw-line-7 { animation-delay: 1750ms; }
+.hero-drawing .draw-line-8 { animation-delay: 1900ms; }
+.hero-drawing .draw-line-9 { animation-delay: 2050ms; }
+.hero-drawing .draw-line-10 { animation-delay: 2200ms; }
+.hero-drawing .draw-line-11 { animation-delay: 2350ms; }
+
+.hero-drawing .draw-dot {
+  fill: #8b4114;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dot-pop 1.6s ease forwards;
+  animation-delay: 1450ms;
+}
+
+.hero-drawing .draw-dot-2 {
+  animation-delay: 1550ms;
+}
+
+.hero-float {
+  animation: hero-float 5.6s ease-in-out infinite;
+}
+
+.hero-float-slow {
+  animation: hero-float-slow 7s ease-in-out infinite;
+}
+
+.hero-crayon {
+  animation: hero-wiggle 3.2s ease-in-out infinite;
+}
+
+.hero-sparkle {
+  animation: hero-sparkle 2.6s ease-in-out infinite;
+}
+
+.hero-badge {
+  animation: hero-float 4.8s ease-in-out infinite;
+}
+
+.garden-sway {
+  animation: garden-sway 6.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.garden-sway-slow {
+  animation: garden-sway-slow 8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.garden-leaf-rest {
+  animation: garden-leaf-rest 7s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.garden-bee-path {
+  animation: garden-bee-path 24s linear infinite;
+}
+
+.garden-insect-path {
+  animation: garden-insect-path 28s linear infinite;
+}
+
+.garden-bee {
+  animation: garden-bee-hover 7s ease-in-out infinite;
+  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.08));
+}
+
+.garden-insect {
+  animation: garden-insect-hover 8s ease-in-out infinite;
+  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.07));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise,
+  .hero-card,
+  .hero-drawing .draw-line,
+  .hero-drawing .draw-dot,
+  .hero-float,
+  .hero-float-slow,
+  .hero-crayon,
+  .hero-sparkle,
+  .hero-badge {
+    animation: none;
+  }
+
+  .garden-sway,
+  .garden-sway-slow,
+  .garden-leaf-rest,
+  .garden-bee-path,
+  .garden-insect-path,
+  .garden-bee,
+  .garden-insect {
+    animation: none;
+  }
+
+  .hero-drawing .draw-line {
+    stroke-dashoffset: 0;
+  }
+
+  .hero-drawing .draw-dot {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
