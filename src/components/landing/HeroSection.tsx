@@ -27,63 +27,69 @@ export function HeroSection({ phrase }: HeroSectionProps) {
         <img
           src="/image/elementosFloral/floral7.png"
           alt=""
-          className="garden-sway-slow absolute left-0 top-0 z-[2] h-52 w-auto opacity-95 md:left-0 md:-top-5 md:h-80"
+          className="garden-sway-slow absolute -left-10 top-0 z-[2] h-40 w-auto opacity-80 sm:h-48 md:-left-14 md:h-56 xl:left-0 xl:-top-5 xl:h-80 xl:opacity-95"
           style={{ "--garden-rotate": "0deg" } as CSSProperties}
         />
         <img
           src="/image/elementosFloral/floral1.png"
           alt=""
-          className="garden-sway absolute -bottom-20 -left-20 h-[25rem] w-auto opacity-90 md:-bottom-28 md:-left-24 md:h-[38rem]"
+          className="garden-sway absolute -bottom-24 -left-28 h-[18rem] w-auto opacity-55 sm:h-[22rem] md:-bottom-28 md:-left-32 md:h-[28rem] xl:-bottom-28 xl:-left-24 xl:h-[38rem] xl:opacity-90"
           style={{ "--garden-rotate": "-7deg" } as CSSProperties}
         />
         <img
           src="/image/elementosFloral/floral5.png"
           alt=""
-          className="garden-sway-slow absolute -right-28 bottom-0 h-[23rem] w-auto opacity-90 md:-right-20 md:h-[34rem]"
+          className="garden-sway-slow absolute -right-32 bottom-8 h-[17rem] w-auto opacity-55 sm:h-[21rem] md:-right-36 md:h-[27rem] xl:-right-20 xl:bottom-0 xl:h-[34rem] xl:opacity-90"
           style={{ "--garden-rotate": "-12deg" } as CSSProperties}
         />
         <img
           src="/image/elementosFloral/floral3.png"
           alt=""
-          className="garden-sway absolute -left-16 top-[34%] h-56 w-auto opacity-75 md:-left-20 md:h-80"
+          className="garden-sway absolute -left-24 top-[38%] h-40 w-auto opacity-45 sm:h-48 md:-left-28 md:h-56 xl:-left-20 xl:top-[34%] xl:h-80 xl:opacity-75"
           style={{ "--garden-rotate": "8deg" } as CSSProperties}
         />
         <img
           src="/image/elementosFloral/floral2.png"
           alt=""
-          className="garden-sway-slow absolute -right-16 top-[21%] h-52 w-auto opacity-75 md:-right-12 md:h-72"
+          className="garden-sway-slow absolute -right-24 top-[18%] h-36 w-auto opacity-45 sm:h-44 md:-right-28 md:h-52 xl:-right-12 xl:top-[21%] xl:h-72 xl:opacity-75"
           style={{ "--garden-rotate": "-16deg" } as CSSProperties}
         />
-        <div className="garden-bee-path absolute left-0 top-[58%] h-12 w-12 md:h-16 md:w-16">
+        <div className="garden-bee-path absolute left-0 top-[61%] h-9 w-9 md:h-11 md:w-11 xl:top-[58%] xl:h-16 xl:w-16">
           <img src="/image/elementosFloral/abelha.png" alt="" className="garden-bee h-full w-auto" />
         </div>
-        <div className="garden-insect-path absolute left-0 top-[22%] h-10 w-10 md:h-14 md:w-14">
+        <div className="garden-insect-path absolute left-0 top-[24%] h-8 w-8 md:h-10 md:w-10 xl:top-[22%] xl:h-14 xl:w-14">
           <img src="/image/elementosFloral/inseto.png" alt="" className="garden-insect h-full w-auto" />
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-7xl gap-10 px-5 py-20 md:grid-cols-[0.98fr_1.02fr] md:items-center md:py-24">
-        <motion.div className="relative z-10" variants={textParent} initial="hidden" animate="show">
+      <div className="relative z-10 mx-auto grid min-h-screen max-w-7xl gap-8 px-5 pb-12 pt-24 sm:pb-16 md:px-8 md:pb-20 md:pt-28 xl:grid-cols-[0.98fr_1.02fr] xl:items-center xl:gap-10 xl:px-5 xl:py-24">
+        <motion.div className="relative z-10 max-w-[42rem] md:max-w-3xl xl:max-w-[42rem]" variants={textParent} initial="hidden" animate="show">
           <motion.p variants={textItem} className="eyebrow text-white">
-            Maiara Matthia · artista visual
+            Maiara Mattia · artista visual
           </motion.p>
-          <motion.h1 variants={textItem} className="mt-5 max-w-3xl font-sans text-5xl font-extralight leading-[1.03] text-[#8b4114] sm:text-6xl lg:text-7xl">
-            Ilustrações que parecem ter sempre morado ali.
+          <motion.h1 variants={textItem} className="mt-4 max-w-2xl font-poppins text-4xl font-thin leading-[1.08] text-[#8b4114] sm:mt-5 sm:text-5xl sm:leading-[1.04] lg:text-6xl">
+            Beleza nas pequenas delicadezas do cotidiano.
           </motion.h1>
-          <motion.p variants={textItem} className="mt-6 max-w-2xl font-sans text-xl font-light leading-8 text-[#8b4114]/85">
-            Publicitária, artista visual, ilustradora e diretora de arte. Maiara cria uma linguagem afetiva entre infância, natureza e memórias delicadas.
+          <motion.p variants={textItem} className="mt-5 max-w-xl font-sans text-base font-light leading-7 text-[#8b4114]/85 sm:mt-6 sm:text-xl sm:leading-8">
+            Sou publicitária e apaixonada por ilustrar, mas, acima de tudo, sou alguém que encontra beleza nas pequenas delicadezas do cotidiano.
           </motion.p>
-          <motion.div variants={textItem} className="mt-7 grid max-w-2xl gap-3 font-sans text-base font-light leading-7 text-[#8b4114]/80 sm:grid-cols-3">
-            <span className="border-l border-white/45 pl-4">flores, folhas e animais</span>
-            <span className="border-l border-white/45 pl-4">objetos feitos para durar</span>
-            <span className="border-l border-white/45 pl-4">arte que desacelera o olhar</span>
+          <motion.div variants={textItem} className="mt-6 grid max-w-2xl gap-4 font-sans text-sm font-light leading-6 text-[#8b4114]/82 sm:mt-7 sm:grid-cols-2 sm:text-base sm:leading-7">
+            <p className="border-l border-white/45 pl-4 sm:pl-5">
+              Meu trabalho nasce da infância, da natureza e das memórias afetivas. Cresce entre flores, folhas, animais, madeira e tons empoeirados.
+            </p>
+            <p className="border-l border-white/45 pl-4 sm:pl-5">
+              Acredito que a arte pode desacelerar o olhar e despertar lembranças, criando acolhimento, leveza e a sensação de que sempre esteve ali.
+            </p>
           </motion.div>
-          <motion.div variants={textItem} className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <motion.div variants={textItem} className="mt-5 inline-flex max-w-full rounded-full border border-white/45 bg-white/20 px-4 py-2 font-sans text-[0.68rem] font-light uppercase leading-5 tracking-[0.12em] text-[#8b4114]/75 backdrop-blur-sm sm:max-w-xl sm:px-5 sm:text-sm sm:tracking-[0.14em]">
+            histórias em ilustrações e objetos feitos para durar
+          </motion.div>
+          <motion.div variants={textItem} className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
             <motion.a
               href="#portfolio"
               whileHover={{ y: -3, rotate: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#8b4114] px-6 font-sans text-lg font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.16)]"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#8b4114] px-5 font-sans text-base font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.16)] sm:px-6 sm:text-lg"
             >
               Conhecer o universo
               <ArrowRight className="h-4 w-4" />
@@ -92,44 +98,27 @@ export function HeroSection({ phrase }: HeroSectionProps) {
               href="#pedido"
               whileHover={{ y: -3, rotate: 1 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex h-12 items-center justify-center rounded-full border border-[#8b4114]/25 bg-white px-6 font-sans text-lg font-light text-[#8b4114]"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-[#8b4114]/25 bg-white px-5 font-sans text-base font-light text-[#8b4114] sm:px-6 sm:text-lg"
             >
               Criar comigo
             </motion.a>
           </motion.div>
         </motion.div>
 
-        <div className="relative min-h-[560px] md:min-h-[620px]">
+        <div className="relative min-h-0 md:min-h-0 xl:min-h-[620px]">
           <motion.div
-            className="relative mx-auto mt-4 max-w-[470px]"
+            className="relative mx-auto mt-2 max-w-[300px] sm:max-w-[360px] md:mt-4 md:max-w-[420px] xl:max-w-[470px]"
             initial={{ opacity: 0, y: 34, rotate: -3, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, rotate: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 95, damping: 15, delay: 0.25 }}
             whileHover={{ rotate: -1, y: -6 }}
           >
-            <div className="absolute -left-5 top-9 z-10 hidden rounded-full bg-white/90 px-5 py-3 font-sans text-xs font-normal uppercase tracking-[0.16em] text-[#7d876d] shadow-[0_14px_32px_rgba(0,0,0,0.08)] sm:block">
-              conforto visual
-            </div>
-            <div className="absolute -right-4 bottom-24 z-10 max-w-[210px] rounded-lg border border-white/60 bg-[#f7eadf]/95 px-5 py-4 font-sans text-sm font-light leading-6 text-[#8b4114] shadow-[0_18px_38px_rgba(0,0,0,0.1)]">
-              "A arte pode despertar lembranças e acolher o olhar."
-            </div>
-            <div className="overflow-hidden rounded-[2rem] border border-white/45 bg-white/35 p-3 shadow-[0_24px_60px_rgba(93,51,29,0.18)] backdrop-blur-sm">
+            <div className="relative z-10 overflow-hidden rounded-[1.5rem] border border-white/45 bg-white/35 p-2.5 shadow-[0_24px_60px_rgba(93,51,29,0.18)] backdrop-blur-sm sm:rounded-[2rem] sm:p-3">
               <img
                 src="/image/maiara.jpeg"
-                alt="Retrato de Maiara Matthia cercada por ilustrações florais"
-                className="aspect-[4/5] w-full rounded-[1.45rem] object-cover object-center"
+                alt="Retrato de Maiara Mattia cercada por ilustrações florais"
+                className="aspect-[4/5] w-full rounded-[1.05rem] object-cover object-center sm:rounded-[1.45rem]"
               />
-            </div>
-            <div className="mx-auto mt-4 max-w-[390px] rounded-lg border border-white/45 bg-white/55 px-6 py-5 text-center backdrop-blur-sm">
-              <p className="font-sans text-[11px] font-light uppercase tracking-[0.18em] text-[#7d876d]">
-                infância · natureza · memória afetiva
-              </p>
-              <p className="mt-2 font-sans text-lg font-light leading-7 text-[#8b4114]">
-                Uma direção de arte feita de presença, madeira, tons empoeirados e delicadezas do cotidiano.
-              </p>
-              <p className="mt-2 font-sans text-[10px] font-light uppercase tracking-[0.16em] text-[#8b4114]/60">
-                {phrase || "peças com alma"}
-              </p>
             </div>
           </motion.div>
         </div>

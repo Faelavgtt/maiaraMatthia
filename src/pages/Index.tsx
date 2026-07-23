@@ -4,10 +4,8 @@ import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { MakerSection } from "@/components/landing/MakerSection";
 import { OrderSection } from "@/components/landing/OrderSection";
-import { PortfolioSection } from "@/components/landing/PortfolioSection";
-import { ProcessSection } from "@/components/landing/ProcessSection";
 import { ServicesSection } from "@/components/landing/ServicesSection";
-import { StudioSection } from "@/components/landing/StudioSection";
+import { WorkShowcaseSection } from "@/components/landing/WorkShowcaseSection";
 
 const Index = () => {
   const [backgroundColor, setBackgroundColor] = useState("#ddb8a6");
@@ -55,8 +53,7 @@ const Index = () => {
     <main className="min-h-screen bg-[#ddb8a6] text-[#8b4114]">
       <Header />
       <HeroSection phrase={title} />
-      <StudioSection />
-      <PortfolioSection />
+      <WorkShowcaseSection />
       <ServicesSection />
       <MakerSection
         backgroundColor={backgroundColor}
@@ -78,7 +75,6 @@ const Index = () => {
         onExampleChange={setSelectedExample}
         onUploadFileNameChange={setUploadFileName}
       />
-      <ProcessSection />
       <OrderSection
         title={title}
         subtitle={subtitle}

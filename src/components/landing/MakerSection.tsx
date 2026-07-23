@@ -1,5 +1,5 @@
 import { ChangeEvent, ReactNode } from "react";
-import { Check, Send, Upload } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Paintbrush, Send, Upload, WandSparkles } from "lucide-react";
 
 const backgroundOptions = [
   { name: "Branco", value: "#ffffff" },
@@ -47,6 +47,29 @@ const svgExamples: Record<string, { src: string; label: string; sizeClass: strin
     sizeClass: "inset-5 md:inset-7",
   },
 };
+
+const makerProcessSteps = [
+  {
+    title: "Envie o desenho",
+    text: "A mãe manda uma foto do desenho da criança e conta a história por trás dele.",
+    icon: Send,
+  },
+  {
+    title: "Escolha a composição",
+    text: "Cores, frase, nome e estilo são escolhidos no maker antes de ir para o WhatsApp.",
+    icon: Paintbrush,
+  },
+  {
+    title: "Receba a prévia",
+    text: "A ilustradora organiza o traço, mantém a alma infantil e envia a prévia para aprovação.",
+    icon: WandSparkles,
+  },
+  {
+    title: "Finalize pelo WhatsApp",
+    text: "Pagamento, ajustes e entrega ficam em uma conversa simples e acolhedora.",
+    icon: MessageCircle,
+  },
+] as const;
 
 type MakerSectionProps = {
   backgroundColor: string;
@@ -104,8 +127,21 @@ export function MakerSection({
 
   return (
     <section id="maker" className="relative overflow-hidden bg-[#7d876d]">
-      <img src="/image/elementoFlor.svg" alt="" aria-hidden="true" className="pointer-events-none absolute -bottom-32 -right-28 h-80 w-80 -rotate-12 opacity-20 mix-blend-soft-light md:-bottom-44 md:-right-36 md:h-[34rem] md:w-[34rem] " />
-      <div className="mx-auto max-w-screen-2xl px-5 py-5 ">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-white opacity-5"
+        style={{
+          WebkitMaskImage: 'url("/image/desenhos/fundoDesenhosCriança.svg")',
+          maskImage: 'url("/image/desenhos/fundoDesenhosCriança.svg")',
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+          WebkitMaskSize: "cover",
+          maskSize: "cover",
+        }}
+      />
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-5 py-5 ">
         <div className="mb-6 max-w-5xl ">
           <p className="font-sans text-xs font-normal uppercase tracking-[0.22em] text-white">Maker de pedido</p>
           <h2 className="mt-1 font-sans text-3xl font-extralight leading-tight text-white md:text-4xl">
@@ -266,6 +302,37 @@ export function MakerSection({
               </a>
             </div>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-white/25 pt-7">
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="font-sans text-xs font-normal uppercase tracking-[0.22em] text-white">Como funciona</p>
+              <h2 className="mt-2 max-w-2xl font-sans text-2xl font-extralight leading-tight text-white md:text-3xl">
+                Do rabisco espontâneo ao quadro pronto para guardar.
+              </h2>
+            </div>
+            <a href="#maker" className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#c68043] px-5 font-sans text-sm font-medium text-white shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
+              Ajustar no maker
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
+            {makerProcessSteps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <article key={step.title} className="rounded-xl border border-white/35 bg-white p-4 text-[#8b4114] shadow-[0_12px_30px_rgba(0,0,0,0.07)]">
+                  <span className="font-sans text-xs font-light text-[#7d876d]">0{index + 1}</span>
+                  <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#ddb8a6] bg-[#ddb8a6]/45 text-[#8b4114]">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <h3 className="mt-4 font-sans text-xl font-light leading-tight text-[#8b4114]">{step.title}</h3>
+                  <p className="mt-2 font-sans text-sm font-light leading-6 text-[#8b4114]">{step.text}</p>
+                </article>
+              );
+            })}
           </div>
         </div>
       </div>

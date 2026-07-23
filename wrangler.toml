@@ -1,4 +1,4 @@
-name = "maiara-matthia-api"
+name = "maiara-mattia-api"
 main = "worker/src/index.ts"
 compatibility_date = "2026-07-16"
 
@@ -15,4 +15,3 @@ database_id = "replace-with-cloudflare-d1-database-id"
 [[r2_buckets]]
 binding = "FILES"
 bucket_name = "maiara-order-files"
-
