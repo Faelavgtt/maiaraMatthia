@@ -275,6 +275,24 @@
   }
 }
 
+@keyframes services-float {
+  0%, 100% {
+    transform: translateY(0) rotate(12deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(20deg);
+  }
+}
+
+@keyframes services-float-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(-12deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-4deg);
+  }
+}
+
 .hero-rise {
   animation: hero-rise 720ms ease-out both;
 }
@@ -400,6 +418,14 @@
   filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.07));
 }
 
+.services-float {
+  animation: services-float 4.8s ease-in-out infinite;
+}
+
+.services-float-slow {
+  animation: services-float-slow 6.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-rise,
   .hero-card,
@@ -419,7 +445,9 @@
   .garden-bee-path,
   .garden-insect-path,
   .garden-bee,
-  .garden-insect {
+  .garden-insect,
+  .services-float,
+  .services-float-slow {
     animation: none;
   }
 

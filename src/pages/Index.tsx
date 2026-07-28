@@ -1,5 +1,8 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Footer } from "@/components/landing/Footer";
+import { FeedbacksSection } from "@/components/landing/FeedbacksSection";
+import { FamilinhaSection } from "@/components/landing/FamilinhaSection";
+import { GallerySection } from "@/components/landing/GallerySection";
 import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { MakerSection } from "@/components/landing/MakerSection";
@@ -19,31 +22,25 @@ const Index = () => {
   const [uploadFileName, setUploadFileName] = useState("");
   const [whatsappUrl, setWhatsappUrl] = useState("");
 
-  const makerSummary = useMemo(
-    () => [
-      `Fundo: ${backgroundColor}`,
-      `Traço: ${outlineColor}`,
-      `Formato: ${orientation === "portrait" ? "retrato" : "paisagem"}`,
-      `Tamanho: ${size}`,
-    ].join(" · "),
-    [backgroundColor, outlineColor, orientation, size],
-  );
-
   const submitOrder = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name") ?? "");
     const phone = String(data.get("phone") ?? "");
+    const projectType = String(data.get("projectType") ?? "");
+    const projectIdea = String(data.get("projectIdea") ?? "");
+    const deadline = String(data.get("deadline") ?? "");
+    const references = String(data.get("references") ?? "");
+
     const message = [
-      "Olá! Quero encomendar uma arte infantil em giz/aquarela.",
+      "Ola! Quero pedir um orcamento com a Maiara Mattia.",
       `Nome: ${name}`,
       `Telefone: ${phone}`,
-      `Título: ${title || "sem título"}`,
-      `Subtítulo: ${subtitle || "sem subtítulo"}`,
-      makerSummary,
-      `Arquivo: ${uploadFileName || "a enviar"}`,
-      `Observações para a designer: ${designerNotes || "sem observações"}`,
-      "Valor fixo: R$ 129,00",
+      `Tipo de projeto: ${projectType || "a definir"}`,
+      `Ideia inicial: ${projectIdea || "a conversar"}`,
+      `Prazo ou data: ${deadline || "sem prazo definido"}`,
+      `Referencias/arquivo: ${references || uploadFileName || "posso enviar depois"}`,
+      `Observacoes: ${designerNotes || "sem observacoes"}`,
     ].join("\n");
 
     setWhatsappUrl(`https://wa.me/?text=${encodeURIComponent(message)}`);
@@ -54,6 +51,8 @@ const Index = () => {
       <Header />
       <HeroSection phrase={title} />
       <WorkShowcaseSection />
+      <FamilinhaSection />
+      <GallerySection />
       <ServicesSection />
       <MakerSection
         backgroundColor={backgroundColor}
@@ -75,13 +74,9 @@ const Index = () => {
         onExampleChange={setSelectedExample}
         onUploadFileNameChange={setUploadFileName}
       />
-      <OrderSection
-        title={title}
-        subtitle={subtitle}
-        makerSummary={makerSummary}
-        whatsappUrl={whatsappUrl}
-        onSubmit={submitOrder}
-      />
+      <FeedbacksSection />
+
+      <OrderSection whatsappUrl={whatsappUrl} onSubmit={submitOrder} />
       <Footer />
     </main>
   );

@@ -92,7 +92,10 @@ export function Header() {
         >
           <a href="#portfolio">Projetos</a>
           <a href="#maker">Maker</a>
+          <a href="#feedbacks">Feedbacks</a>
           <a href="#pedido">Pedido</a>
+
+          
         </div>
         <a href="#pedido" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#7d876d] px-4 font-sans text-sm font-medium text-white shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
           <MessageCircle className="h-4 w-4" />
