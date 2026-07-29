@@ -15,7 +15,6 @@ Nesta versao temporaria, a API nao usa banco de dados.
 
 - `wrangler.toml`: configuracao base do Worker, assets estaticos e R2.
 - `worker/src/index.ts`: rotas temporarias da API sem banco.
-- `public/_redirects`: fallback para rotas SPA no Cloudflare Pages.
 
 ## Rotas da API
 
