@@ -1,29 +1,49 @@
-import { useEffect, useRef, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Frame, Image as ImageIcon, MessageCircle, Sparkles } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Frame, 
+  Image as ImageIcon, 
+  MessageCircle, 
+  Sparkles, 
+  Heart, 
+  Star 
+} from "lucide-react";
+import { GalleryModal, type GalleryProject } from "./GalleryModal";
 
 const customGalleryMessage = [
-  "Ola! Quero orcar uma galeria personalizada com a Maiara Mattia.",
+  "Olá! Quero orçar uma galeria personalizada com a Maiara Mattia.",
   "Tenho interesse em 3 quadros que se conversam + 1 Familinha.",
   "Podemos conversar sobre tema, cores e medidas?",
 ].join("\n");
 
 const readyGalleryMessage = [
-  "Ola! Quero saber mais sobre as galerias prontas da Maiara Mattia.",
+  "Olá! Quero saber mais sobre as galerias prontas da Maiara Mattia.",
   "Tenho interesse em escolher uma arte pronta e customizar as cores.",
 ].join("\n");
 
 const customGalleryUrl = `https://wa.me/?text=${encodeURIComponent(customGalleryMessage)}`;
 const readyGalleryUrl = `https://wa.me/?text=${encodeURIComponent(readyGalleryMessage)}`;
 
-const galleryProjects = [
+const galleryProjects: readonly GalleryProject[] = [
   {
+    id: "galeria-01",
     number: "01",
-    title: "Jardim de casa",
-    category: "Galeria pronta",
-    description: "Tres quadros florais que conversam entre si, com uma Familinha para deixar a parede com memoria.",
-    placeholder: "Galeria pronta",
-    src: "/image/desenhos/galeria.jpeg",
+    title: "Jardim de Casa",
+    category: "Galeria Pronta",
+    price: "R$ 380,00",
+    originalPrice: "R$ 440,00",
+    dimensions: "Composição 120x60cm",
+    includedItems: [
+      "3 Quadros ilustrados (30x40cm cada)",
+      "1 Quadro Familinha Central (20x30cm)",
+      "Molduras em madeira natural inclusas",
+      "Certificado de autenticidade assinado"
+    ],
+    description: "Três quadros florais que conversam entre si, com uma Familinha para deixar a parede com memória e afeto.",
+    placeholder: "Galeria Pronta",
+    src: "",
     surface: "#ead4c6",
     width: 350,
     aspectRatio: "16 / 9",
@@ -31,12 +51,20 @@ const galleryProjects = [
     rotate: -0.4,
   },
   {
+    id: "galeria-02",
     number: "02",
-    title: "Brincadeira suave",
-    category: "Cores customizaveis",
-    description: "Uma base pronta que pode ganhar outra paleta para combinar com quarto, sala ou brinquedoteca.",
-    placeholder: "Galeria customizavel",
-    src: "/image/desenhos/desenhos.jpeg",
+    title: "Brincadeira Suave",
+    category: "Cores Customizáveis",
+    price: "R$ 320,00",
+    dimensions: "Composição 90x50cm",
+    includedItems: [
+      "2 Quadros decorativos lúdicos",
+      "1 Quadro Familinha em destaque",
+      "Paleta de cores customizável"
+    ],
+    description: "Uma base pronta que pode ganhar outra paleta de cores para combinar com o quarto, sala ou brinquedoteca.",
+    placeholder: "Galeria Customizável",
+    src: "",
     surface: "#e4e7d9",
     width: 270,
     aspectRatio: "4 / 5",
@@ -44,12 +72,21 @@ const galleryProjects = [
     rotate: -1.2,
   },
   {
+    id: "galeria-03",
     number: "03",
-    title: "Pequeno universo",
-    category: "Kit decorativo",
-    description: "Artes prontas com clima infantil, pensadas como conjunto para criar ritmo na parede.",
-    placeholder: "Kit de quadros",
-    src: "/image/desenhos/desenhos2.jpeg",
+    title: "Pequeno Universo",
+    category: "Kit Decorativo",
+    price: "R$ 410,00",
+    originalPrice: "R$ 460,00",
+    dimensions: "Composição 110x70cm",
+    includedItems: [
+      "3 Quadros temáticos infantis",
+      "1 Arte Familinha sob medida",
+      "Acabamento em vidro anti-reflexo"
+    ],
+    description: "Artes prontas com clima infantil, pensadas como conjunto para criar ritmo e harmonia na parede.",
+    placeholder: "Kit de Quadros",
+    src: "",
     surface: "#f0dfd4",
     width: 310,
     aspectRatio: "5 / 4",
@@ -57,12 +94,20 @@ const galleryProjects = [
     rotate: -1.5,
   },
   {
+    id: "galeria-04",
     number: "04",
-    title: "Familinha central",
-    category: "Retrato afetivo",
-    description: "A Familinha entra como quarto quadro do conjunto, trazendo os personagens reais da casa.",
-    placeholder: "Familinha",
-    src: "/image/desenhos/quadroFamilinha2.jpeg",
+    title: "Familinha Central",
+    category: "Retrato Afetivo",
+    price: "R$ 290,00",
+    dimensions: "Composição 80x40cm",
+    includedItems: [
+      "1 Quadro Familinha Ilustrado à mão",
+      "2 Minis ilustrações complementares",
+      "Moldura pastel à escolha"
+    ],
+    description: "A Familinha entra como o ponto focal da composição, trazendo os personagens reais da sua casa.",
+    placeholder: "Familinha Central",
+    src: "",
     surface: "#e1d7c8",
     width: 250,
     aspectRatio: "3 / 4",
@@ -70,32 +115,45 @@ const galleryProjects = [
     rotate: 1.6,
   },
   {
+    id: "galeria-05",
     number: "05",
-    title: "Galeria personalizada",
-    category: "Projeto sob medida",
-    description: "Para quem quer uma composicao criada do zero: tema, cores, nomes e simbolos especiais.",
-    placeholder: "Orcar do zero",
-    src: "/image/desenhos/quadroFamilinha3.jpeg",
+    title: "Galeria Personalizada",
+    category: "Projeto Sob Medida",
+    price: "A partir de R$ 480,00",
+    dimensions: "Tamanho sob consulta",
+    includedItems: [
+      "Projeto conceitual criado do zero",
+      "Escolha de temas, cores, nomes e pets",
+      "Acompanhamento e aprovação do esboço",
+      "Consultoria de disposição na parede"
+    ],
+    description: "Para quem quer uma composição criada totalmente do zero: tema, cores, nomes e símbolos afetivos.",
+    placeholder: "Orçar do Zero",
+    src: "",
     surface: "#e6d8cf",
     width: 230,
     aspectRatio: "1 / 1",
     offset: 4,
     rotate: 1.3,
   },
-] as const;
+];
 
 export function GallerySection() {
   const wallRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
+  const pressedProjectIdRef = useRef<string | null>(null);
   const reduceMotion = useReducedMotion();
+  
+  const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
+
   const carouselProjects = [...galleryProjects, ...galleryProjects, ...galleryProjects];
 
   const getLoopSegmentWidth = () => {
     const wall = wallRef.current;
     if (!wall) return 0;
-
     return wall.scrollWidth / 3;
   };
 
@@ -125,6 +183,8 @@ export function GallerySection() {
 
   const startWallDrag = (event: PointerEvent<HTMLDivElement>) => {
     isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    pressedProjectIdRef.current = (event.target as HTMLElement).closest<HTMLElement>("[data-gallery-project-id]")?.dataset.galleryProjectId ?? null;
     dragStartXRef.current = event.clientX;
     dragStartScrollLeftRef.current = wallRef.current?.scrollLeft ?? 0;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -134,6 +194,9 @@ export function GallerySection() {
     if (!isDraggingRef.current || !wallRef.current) return;
 
     const distance = event.clientX - dragStartXRef.current;
+    if (Math.abs(distance) > 6) {
+      hasDraggedRef.current = true;
+    }
     wallRef.current.scrollLeft = dragStartScrollLeftRef.current - distance;
   };
 
@@ -142,6 +205,19 @@ export function GallerySection() {
 
     isDraggingRef.current = false;
     event.currentTarget.releasePointerCapture(event.pointerId);
+
+    if (!hasDraggedRef.current) {
+      const project = galleryProjects.find((item) => item.id === pressedProjectIdRef.current);
+
+      if (project) {
+        setSelectedProject(project);
+      }
+
+      pressedProjectIdRef.current = null;
+      return;
+    }
+
+    pressedProjectIdRef.current = null;
     syncLoopPosition();
   };
 
@@ -157,11 +233,32 @@ export function GallerySection() {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedProject(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
-    <section id="galeria" className="relative overflow-hidden bg-[#f8f1e9] px-5 pb-14 pt-8 sm:px-8 md:pb-16 md:pt-10">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[linear-gradient(180deg,#f8f1e9_0%,rgba(248,241,233,0)_100%)]" aria-hidden="true" />
+    <section id="galeria" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-16 pt-3 sm:px-8 md:pb-20 md:pt-5">
+      
+      {/* Background Decorativo */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <div className="absolute inset-0 bg-[radial-gradient(#8b4114_0.75px,transparent_0.75px)] [background-size:24px_24px] opacity-[0.06]" />
+
+        
+
+z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
+        <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-[#f5dfb8]/40 blur-3xl" />
+
+        <Star className="absolute left-[6%] bottom-20 h-8 w-8 -rotate-12 fill-[#7d876d] text-[#7d876d]/80" />
+      </div>
+
       <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-6 border-b border-[#8b4114]/15 pb-6 lg:grid-cols-[1fr_0.74fr] lg:items-end">
+        <div className="grid gap-6 border-b border-[#8b4114]/12 pb-8 lg:grid-cols-[1fr_0.78fr] lg:items-end">
+          
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -169,30 +266,36 @@ export function GallerySection() {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="max-w-3xl"
           >
-            <p className="inline-flex items-center gap-2 font-sans text-[0.68rem] font-normal uppercase tracking-[0.2em] text-[#7d876d]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#e8efda] px-3.5 py-1 font-sans text-xs font-semibold tracking-wider text-[#5f6850] shadow-xs">
               <Frame className="h-3.5 w-3.5" aria-hidden="true" />
-              Galerias prontas
-            </p>
-            <h2 className="mt-2 font-sans text-2xl font-extralight leading-tight text-[#8b4114] sm:text-3xl md:text-[2.25rem]">
-              Tres quadros que se conversam, mais uma Familinha para fechar a historia.
+              GALERIAS PRONTAS & KITS
+            </div>
+
+            <h2 className="mt-3 font-sans text-3xl font-light leading-tight text-[#8b4114] sm:text-4xl md:text-[2.5rem]">
+              Três quadros que se conversam, mais uma Familinha para fechar a história.
             </h2>
-            <p className="mt-2 max-w-2xl font-sans text-sm font-light leading-6 text-[#8b4114]/70">
-              A galeria e um conjunto pensado para parede: tres artes decorativas com a mesma linguagem visual e uma Familinha feita para trazer nome, afeto e memoria ao centro da composicao.
+            <p className="mt-3 max-w-2xl font-sans text-sm font-light leading-relaxed text-[#8b4114]/80 sm:text-base">
+              Explore nossos conjuntos prontos para parede. Clique em qualquer opção para ver os detalhes do kit, dimensões e encomendar o seu conjunto.
             </p>
           </motion.div>
 
-          <div className="rounded-xl border border-[#8b4114]/10 bg-[#d39a7e] p-4 text-white shadow-[0_14px_34px_rgba(102,61,36,0.12)] [&_h3]:mt-1.5 [&_h3]:text-xl">
-            <p className="font-sans text-[0.68rem] font-normal uppercase tracking-[0.18em] text-white">Pronta ou sob medida?</p>
-            <h3 className="mt-2 font-sans text-2xl font-extralight leading-tight">Escolha uma arte pronta ou peca uma personalizada.</h3>
-            <p className="mt-1.5 font-sans text-xs font-light leading-5 text-white/78">
-              As galerias prontas podem ter cores ajustadas. Se a ideia pedir outro tema, a Maiara cria do zero.
+          <div className="relative -rotate-1 rounded-2xl border-2 border-dashed border-[#e6c29c] bg-[#fff9f2] p-5 shadow-sm transition-all duration-300 hover:rotate-0">
+            <span className="inline-flex items-center gap-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-wider text-[#7d876d]">
+              <Heart className="h-3 w-3 fill-[#7d876d]" />
+              Pronta ou sob medida?
+            </span>
+            <h3 className="mt-1 font-sans text-xl font-normal leading-tight text-[#8b4114]">
+              Escolha uma galeria pronta ou peça um projeto exclusivo.
+            </h3>
+            <p className="mt-2 font-sans text-xs font-light leading-relaxed text-[#8b4114]/75">
+              As galerias prontas podem ter cores e quadros ajustados. Se quiser outro tema, criamos do zero.
             </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
               <a
                 href={readyGalleryUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#7d876d] px-4 font-sans text-xs font-medium text-white shadow-[0_10px_22px_rgba(0,0,0,0.14)] transition-transform hover:-translate-y-0.5"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#7d876d] px-4 font-sans text-xs font-medium text-white shadow-xs transition-transform hover:-translate-y-0.5"
               >
                 <Sparkles className="h-4 w-4" aria-hidden="true" />
                 Ver prontas
@@ -201,40 +304,41 @@ export function GallerySection() {
                 href={customGalleryUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-white px-4 font-sans text-xs font-medium text-[#8b4114] shadow-[0_10px_22px_rgba(0,0,0,0.10)] transition-transform hover:-translate-y-0.5"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-white border border-[#8b4114]/15 px-4 font-sans text-xs font-medium text-[#8b4114] shadow-xs transition-transform hover:-translate-y-0.5"
               >
                 <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                Orcar personalizada
+                Orçar personalizada
               </a>
             </div>
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-3">
-          <p className="font-sans text-[0.68rem] font-light uppercase tracking-[0.14em] text-[#8b4114]/50">
-            Arraste a parede para explorar
+          <p className="font-sans text-[0.7rem] font-medium uppercase tracking-wider text-[#8b4114]/60">
+            ↔ Arraste a parede para explorar os kits
           </p>
 
-          <div className="flex items-center gap-3" aria-label="Controles do carrossel">
+          <div className="flex items-center gap-2.5" aria-label="Controles do carrossel">
             <button
               type="button"
               onClick={() => scrollWall("previous")}
               aria-label="Ver galerias anteriores"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8b4114]/20 bg-white text-[#8b4114] shadow-[0_8px_20px_rgba(102,61,36,0.07)] transition-colors hover:bg-[#ead4c6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b4114]/40"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8b4114]/15 bg-white text-[#8b4114] shadow-xs transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b4114]/40"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
               type="button"
               onClick={() => scrollWall("next")}
-              aria-label="Ver proximas galerias"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8b4114] text-white shadow-[0_8px_20px_rgba(102,61,36,0.14)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b4114]/40 focus-visible:ring-offset-2"
+              aria-label="Ver próximas galerias"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8b4114] text-white shadow-xs transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b4114]/40"
             >
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
 
+        {/* --- CARROSSEL --- */}
         <div className="mt-4 rounded-xl bg-[#979f8a] shadow-inner">
           <div
             ref={wallRef}
@@ -244,26 +348,36 @@ export function GallerySection() {
             onPointerCancel={stopWallDrag}
             onPointerLeave={stopWallDrag}
             onScroll={syncLoopPosition}
-            className="flex min-h-[30rem] cursor-grab select-none items-start gap-9 overflow-x-auto px-10 pb-9 pt-12 active:cursor-grabbing sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-h-[31rem] cursor-grab select-none items-start gap-9 overflow-x-auto px-10 pb-9 pt-12 active:cursor-grabbing sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {carouselProjects.map((project, index) => (
-              <GalleryFrame key={`${index}-${project.number}`} project={project} index={index} reduceMotion={Boolean(reduceMotion)} />
+              <GalleryFrame 
+                key={`${index}-${project.number}`} 
+                project={project} 
+                index={index} 
+                reduceMotion={Boolean(reduceMotion)} 
+                onSelect={() => setSelectedProject(project)}
+              />
             ))}
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 border-t border-[#8b4114]/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Rodapé da Seção */}
+        <div className="mt-6 flex flex-col gap-3 border-t border-[#8b4114]/12 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <a
             href={customGalleryUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#c68043] px-4 font-sans text-xs font-medium text-white shadow-[0_10px_24px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#c68043] px-5 font-sans text-xs font-medium text-white shadow-xs transition-transform hover:-translate-y-0.5"
           >
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
             Quero uma galeria personalizada
           </a>
         </div>
       </div>
+
+      {/* Componente Modal / Pop-up Isolado */}
+      <GalleryModal project={selectedProject} onClose={() => setSelectedProject(null)} />
     </section>
   );
 }
@@ -272,10 +386,12 @@ function GalleryFrame({
   project,
   index,
   reduceMotion,
+  onSelect,
 }: {
-  project: (typeof galleryProjects)[number];
+  project: GalleryProject;
   index: number;
   reduceMotion: boolean;
+  onSelect: () => void;
 }) {
   const frameWidth = `min(${Math.round(project.width * 0.96)}px, 74vw)`;
 
@@ -286,17 +402,33 @@ function GalleryFrame({
       whileHover={reduceMotion ? undefined : { y: -6, rotate: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.52, delay: index * 0.05, ease: "easeOut" }}
-      className="group relative shrink-0 snap-center"
+      className="group relative shrink-0 snap-center cursor-pointer"
+      data-gallery-project-id={project.id}
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
       style={{
         width: frameWidth,
         marginTop: Math.round(project.offset * 0.45),
         rotate: `${project.rotate}deg`,
       }}
     >
+      {/* Pregador / Pino no topo */}
       <span className="absolute left-1/2 top-[-1.35rem] h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#f0dfd4] shadow-[0_2px_6px_rgba(0,0,0,0.2)]" />
       <span className="absolute left-1/2 top-[-1rem] h-6 w-px -translate-x-1/2 bg-[#f0dfd4]/85" />
 
-      <div className="relative border-[6px] border-[#f0dfd4] bg-[#fffaf5] p-2.5 shadow-[0_14px_28px_rgba(54,67,64,0.24)]">
+      {/* Badge de Preço Flutuante */}
+      <div className="absolute -right-2 -top-4 z-20 rounded-full bg-[#c68043] px-2.5 py-0.5 font-sans text-[0.65rem] font-semibold text-white shadow-sm transition-transform group-hover:scale-110">
+        {project.price}
+      </div>
+
+      <div className="relative border-[6px] border-[#f0dfd4] bg-[#fffaf5] p-2.5 shadow-[0_14px_28px_rgba(54,67,64,0.24)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(54,67,64,0.35)]">
         <div
           className="relative overflow-hidden border border-[#d6bea1]"
           style={{
@@ -307,30 +439,35 @@ function GalleryFrame({
           {project.src ? (
             <img src={project.src} alt={project.title} className="h-full w-full object-cover" draggable="false" />
           ) : (
-            <div className="absolute inset-4 flex flex-col items-center justify-center bg-[#fffaf5]/78 px-5 text-center text-[#8b4114]">
+            <div className="absolute inset-4 flex flex-col items-center justify-center bg-[#fffaf5]/85 px-5 text-center text-[#8b4114]">
               <ImageIcon className="h-8 w-8" aria-hidden="true" />
-              <p className="mt-3 font-sans text-xs font-normal uppercase tracking-[0.16em] text-[#8b4114]/70">{project.placeholder}</p>
-              <p className="mt-1 font-sans text-[0.68rem] font-light leading-4 text-[#8b4114]/45">imagem sera adicionada depois</p>
+              <p className="mt-3 font-sans text-xs font-semibold uppercase tracking-wider text-[#8b4114]/80">{project.placeholder}</p>
+              <p className="mt-1 font-sans text-[0.68rem] font-light leading-4 text-[#8b4114]/60">Imagem será adicionada depois</p>
             </div>
           )}
 
+          {/* Overlay de Hover */}
           <div className="absolute inset-0 flex items-center justify-center bg-[#1f1713]/72 p-3 text-center text-[#8b4114] opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
-            <div className="flex max-h-full w-full flex-col items-center justify-center bg-[#fffaf5]/88 px-3 py-4 backdrop-blur-sm">
-              <p className="font-sans text-[0.56rem] font-normal uppercase leading-3 tracking-[0.14em] text-[#8b4114]/70">
+            <div className="flex max-h-full w-full flex-col items-center justify-center rounded-xl bg-[#fffaf5]/95 px-3 py-4 shadow-md">
+              <p className="font-sans text-[0.58rem] font-semibold uppercase leading-3 tracking-wider text-[#7d876d]">
                 {project.number} · {project.category}
               </p>
-              <h3 className="mt-1.5 font-sans text-base font-normal leading-tight">{project.title}</h3>
-              <p className="mt-1.5 font-sans text-[0.72rem] font-light leading-4 text-[#8b4114]/78">{project.description}</p>
+              <h3 className="mt-1 font-sans text-base font-normal leading-tight text-[#8b4114]">{project.title}</h3>
+              <p className="mt-1 font-sans text-sm font-semibold text-[#8b4114]">{project.price}</p>
+              <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#8b4114] px-3 py-1 font-sans text-[0.65rem] font-medium text-white shadow-xs">
+                Ver detalhes e comprar
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-2 text-center text-[#ffffff]">
-        <p className="font-sans text-[0.6rem] font-normal uppercase tracking-[0.16em] text-[#8b4114]/72">
+      {/* TEXTO CORRIGIDO: Aplicado fundo pastel/transparente e texto escuro para legibilidade perfeita sobre a parede verde #979f8a */}
+      <div className="mt-2.5 rounded-lg bg-black/20 px-2 py-1 text-center backdrop-blur-xs">
+        <p className="font-sans text-[0.62rem] font-semibold uppercase tracking-wider text-[#f0dfd4]">
           {project.number} · {project.category}
         </p>
-        <h3 className="mt-0.5 font-sans text-xs font-normal leading-tight">{project.title}</h3>
+        <h3 className="mt-0.5 font-sans text-xs font-medium leading-tight text-white">{project.title}</h3>
       </div>
     </motion.article>
   );

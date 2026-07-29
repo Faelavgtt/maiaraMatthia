@@ -1,4 +1,4 @@
-name = "maiara-mattia-api"
+name = "maiaramatthia"
 main = "worker/src/index.ts"
 compatibility_date = "2026-07-16"
 
@@ -10,7 +10,8 @@ WHATSAPP_NUMBER = ""
 [[d1_databases]]
 binding = "DB"
 database_name = "maiara_orders"
-database_id = "replace-with-cloudflare-d1-database-id"
+# Replace with the UUID shown in Cloudflare D1 > maiara_orders.
+database_id = "TODO_D1_DATABASE_ID"
 
 [[r2_buckets]]
 binding = "FILES"
