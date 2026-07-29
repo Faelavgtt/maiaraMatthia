@@ -7,12 +7,6 @@ APP_ORIGIN = "http://localhost:8080"
 ADMIN_EMAILS = ""
 WHATSAPP_NUMBER = ""
 
-[[d1_databases]]
-binding = "DB"
-database_name = "maiara_orders"
-# Replace with the UUID shown in Cloudflare D1 > maiara_orders.
-database_id = "TODO_D1_DATABASE_ID"
-
 [[r2_buckets]]
 binding = "FILES"
 bucket_name = "maiara-order-files"

@@ -9,8 +9,6 @@
     "build:dev": "vite build --mode development",
     "cf:worker:dev": "wrangler dev",
     "cf:worker:deploy": "wrangler deploy",
-    "cf:d1:migrate:local": "wrangler d1 migrations apply maiara_orders --local",
-    "cf:d1:migrate:remote": "wrangler d1 migrations apply maiara_orders --remote",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "serve -s dist"
