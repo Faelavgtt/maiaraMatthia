@@ -6,14 +6,14 @@ Nesta versao temporaria, a API nao usa banco de dados.
 ## Componentes
 
 - `React + Vite`: site publico, formulario de pedido, acompanhamento e painel.
-- `Cloudflare Pages`: hospedagem do front estatico.
+- `Cloudflare Workers Static Assets`: hospedagem do front estatico gerado em `dist/`.
 - `Cloudflare Workers`: API para pedidos temporarios, uploads e painel.
 - `Cloudflare R2`: arquivos enviados pelos clientes.
 - `Cloudflare Access`: protecao da rota `/admin` e das rotas administrativas.
 
 ## Arquivos
 
-- `wrangler.toml`: configuracao base do Worker e R2.
+- `wrangler.toml`: configuracao base do Worker, assets estaticos e R2.
 - `worker/src/index.ts`: rotas temporarias da API sem banco.
 - `public/_redirects`: fallback para rotas SPA no Cloudflare Pages.
 
@@ -38,8 +38,8 @@ Configure em Cloudflare Workers:
 ## Primeiro deploy
 
 1. Criar o bucket R2.
-2. Publicar o Worker.
-3. Publicar o front no Pages.
+2. Rodar `npm run build`.
+3. Publicar o Worker com `npx wrangler deploy`.
 4. Configurar Cloudflare Access para `/admin`.
 
 ## Proximo passo no front
