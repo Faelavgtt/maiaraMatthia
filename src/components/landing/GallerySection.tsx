@@ -44,6 +44,7 @@ const galleryProjects: readonly GalleryProject[] = [
     description: "Três quadros florais que conversam entre si, com uma Familinha para deixar a parede com memória e afeto.",
     placeholder: "Galeria Pronta",
     src: "",
+    hoverSrc: "",
     surface: "#ead4c6",
     width: 350,
     aspectRatio: "16 / 9",
@@ -65,6 +66,7 @@ const galleryProjects: readonly GalleryProject[] = [
     description: "Uma base pronta que pode ganhar outra paleta de cores para combinar com o quarto, sala ou brinquedoteca.",
     placeholder: "Galeria Customizável",
     src: "",
+    hoverSrc: "",
     surface: "#e4e7d9",
     width: 270,
     aspectRatio: "4 / 5",
@@ -87,6 +89,7 @@ const galleryProjects: readonly GalleryProject[] = [
     description: "Artes prontas com clima infantil, pensadas como conjunto para criar ritmo e harmonia na parede.",
     placeholder: "Kit de Quadros",
     src: "",
+    hoverSrc: "",
     surface: "#f0dfd4",
     width: 310,
     aspectRatio: "5 / 4",
@@ -108,6 +111,7 @@ const galleryProjects: readonly GalleryProject[] = [
     description: "A Familinha entra como o ponto focal da composição, trazendo os personagens reais da sua casa.",
     placeholder: "Familinha Central",
     src: "",
+    hoverSrc: "",
     surface: "#e1d7c8",
     width: 250,
     aspectRatio: "3 / 4",
@@ -130,6 +134,7 @@ const galleryProjects: readonly GalleryProject[] = [
     description: "Para quem quer uma composição criada totalmente do zero: tema, cores, nomes e símbolos afetivos.",
     placeholder: "Orçar do Zero",
     src: "",
+    hoverSrc: "",
     surface: "#e6d8cf",
     width: 230,
     aspectRatio: "1 / 1",
@@ -250,7 +255,7 @@ export function GallerySection() {
 
         
 
-z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
+        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
         <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-[#f5dfb8]/40 blur-3xl" />
 
         <Star className="absolute left-[6%] bottom-20 h-8 w-8 -rotate-12 fill-[#7d876d] text-[#7d876d]/80" />
@@ -437,7 +442,23 @@ function GalleryFrame({
           }}
         >
           {project.src ? (
-            <img src={project.src} alt={project.title} className="h-full w-full object-cover" draggable="false" />
+            <>
+              <img
+                src={project.src}
+                alt={project.title}
+                className="h-full w-full object-cover transition-opacity duration-500 ease-out group-hover:opacity-0 group-focus-visible:opacity-0"
+                draggable="false"
+              />
+              {project.hoverSrc && (
+                <img
+                  src={project.hoverSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+                  draggable="false"
+                />
+              )}
+            </>
           ) : (
             <div className="absolute inset-4 flex flex-col items-center justify-center bg-[#fffaf5]/85 px-5 text-center text-[#8b4114]">
               <ImageIcon className="h-8 w-8" aria-hidden="true" />
@@ -446,19 +467,6 @@ function GalleryFrame({
             </div>
           )}
 
-          {/* Overlay de Hover */}
-          <div className="absolute inset-0 flex items-center justify-center bg-[#1f1713]/72 p-3 text-center text-[#8b4114] opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
-            <div className="flex max-h-full w-full flex-col items-center justify-center rounded-xl bg-[#fffaf5]/95 px-3 py-4 shadow-md">
-              <p className="font-sans text-[0.58rem] font-semibold uppercase leading-3 tracking-wider text-[#7d876d]">
-                {project.number} · {project.category}
-              </p>
-              <h3 className="mt-1 font-sans text-base font-normal leading-tight text-[#8b4114]">{project.title}</h3>
-              <p className="mt-1 font-sans text-sm font-semibold text-[#8b4114]">{project.price}</p>
-              <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#8b4114] px-3 py-1 font-sans text-[0.65rem] font-medium text-white shadow-xs">
-                Ver detalhes e comprar
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 

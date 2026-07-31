@@ -14,6 +14,7 @@ export interface GalleryProject {
   description: string;
   placeholder: string;
   src: string;
+  hoverSrc?: string;
   surface: string;
   width: number;
   aspectRatio: string;
