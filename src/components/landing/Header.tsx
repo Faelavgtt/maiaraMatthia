@@ -91,6 +91,7 @@ export function Header() {
           style={{ color: navTextColor }}
         >
           <a href="#portfolio">Projetos</a>
+          <a href="#outros-projetos">Atelie</a>
           <a href="#maker">Maker</a>
           <a href="#feedbacks">Feedbacks</a>
           <a href="#pedido">Pedido</a>

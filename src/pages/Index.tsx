@@ -7,6 +7,7 @@ import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { MakerSection } from "@/components/landing/MakerSection";
 import { OrderSection } from "@/components/landing/OrderSection";
+import { OtherProjectsSection } from "@/components/landing/OtherProjectsSection";
 import { ServicesSection } from "@/components/landing/ServicesSection";
 import { WorkShowcaseSection } from "@/components/landing/WorkShowcaseSection";
 
@@ -53,6 +54,7 @@ const Index = () => {
       <WorkShowcaseSection />
       <FamilinhaSection />
       <GallerySection />
+      <OtherProjectsSection />
       <ServicesSection />
       <MakerSection
         backgroundColor={backgroundColor}

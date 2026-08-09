@@ -44,7 +44,7 @@ const AdminOrders = () => {
             </p>
           </div>
           <div className="rounded-md border border-[#8b4114]/15 bg-white/60 px-4 py-2 font-sans text-xs font-light text-[#8b4114]/70">
-            {isLoading ? "Carregando API..." : isError ? "Usando dados de exemplo" : "Dados conectados"}
+            {isLoading ? "Atualizando informacoes..." : isError ? "Mostrando uma previa local" : "Informacoes atualizadas"}
           </div>
         </div>
 

@@ -442,10 +442,6 @@
   .garden-sway,
   .garden-sway-slow,
   .garden-leaf-rest,
-  .garden-bee-path,
-  .garden-insect-path,
-  .garden-bee,
-  .garden-insect,
   .services-float,
   .services-float-slow {
     animation: none;
@@ -458,5 +454,194 @@
   .hero-drawing .draw-dot {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  #inicio > .relative.z-10 {
+    min-height: auto;
+    gap: 1.75rem;
+    padding-top: 5.75rem;
+    padding-bottom: 3.25rem;
+  }
+
+  #inicio h1 {
+    max-width: 34rem;
+    font-size: 3.15rem;
+    line-height: 1.05;
+  }
+
+  #inicio h1 + p {
+    max-width: 32rem;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  #inicio h1 + p + div {
+    gap: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  #inicio .inline-flex.rounded-full {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  #inicio a {
+    min-height: 2.8rem;
+    height: 2.8rem;
+    font-size: 0.95rem;
+  }
+
+  #inicio .xl\:min-h-\[620px\] {
+    min-height: 500px;
+  }
+
+  #inicio .xl\:max-w-\[470px\] {
+    max-width: 390px;
+  }
+
+  #portfolio,
+  #servicos,
+  #outros-projetos,
+  #feedbacks {
+    padding-top: 3.25rem;
+    padding-bottom: 3.25rem;
+  }
+
+  #familinha {
+    padding-top: 3.25rem;
+    padding-bottom: 4.5rem;
+  }
+
+  #galeria {
+    padding-top: 1rem;
+    padding-bottom: 4rem;
+  }
+
+  #portfolio h2,
+  #outros-projetos h2,
+  #servicos h2,
+  #familinha h2,
+  #galeria h2,
+  #feedbacks h2,
+  #pedido h2 {
+    font-size: 2rem;
+    line-height: 1.14;
+  }
+
+  #pedido p,
+  #maker p,
+  #feedbacks p,
+  #galeria p,
+  #outros-projetos p,
+  #familinha p,
+  #servicos p,
+  #portfolio p {
+    line-height: 1.6;
+  }
+
+  #galeria [class*="min-h-[31rem]"],
+  #outros-projetos [class*="min-h-[31rem]"] {
+    min-height: 28rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2rem;
+  }
+
+  #maker > .relative.z-10 {
+    padding-top: 2.75rem;
+    padding-bottom: 2.75rem;
+  }
+
+  #maker h2 {
+    font-size: 2rem;
+    line-height: 1.14;
+  }
+
+  #maker h2 + p {
+    max-width: 56rem;
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+
+  #maker [class*="min-h-[430px]"] {
+    min-height: 350px;
+  }
+
+  #maker [class*="max-w-[330px]"] {
+    max-width: 285px;
+  }
+
+  #maker [class*="max-w-[470px]"] {
+    max-width: 390px;
+  }
+
+  #maker [class*="min-h-[86px]"] {
+    min-height: 70px;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+  }
+
+  #maker [class*="text-xl"] {
+    font-size: 1.05rem;
+  }
+
+  #pedido {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  #pedido h2 + p {
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+
+  #pedido form {
+    padding: 1.35rem;
+  }
+
+  #pedido input,
+  #pedido select,
+  #pedido button,
+  #pedido a {
+    min-height: 2.75rem;
+    height: 2.75rem;
+  }
+
+  #pedido textarea {
+    min-height: 6.5rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) and (max-height: 820px) {
+  #inicio > .relative.z-10 {
+    padding-top: 5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  #inicio h1 {
+    font-size: 2.85rem;
+  }
+
+  #inicio h1 + p {
+    margin-top: 1rem;
+  }
+
+  #inicio h1 + p + div {
+    margin-top: 1rem;
+  }
+
+  #inicio .xl\:max-w-\[470px\] {
+    max-width: 350px;
+  }
+
+  #galeria [class*="min-h-[31rem]"],
+  #outros-projetos [class*="min-h-[31rem]"] {
+    min-height: 26rem;
+  }
+
+  #maker [class*="min-h-[430px]"] {
+    min-height: 320px;
   }
 }

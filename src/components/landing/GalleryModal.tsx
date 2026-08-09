@@ -25,13 +25,13 @@ export interface GalleryProject {
 interface GalleryModalProps {
   project: GalleryProject | null;
   onClose: () => void;
+  onAddToCart: (project: GalleryProject) => void;
 }
 
-export function GalleryModal({ project, onClose }: GalleryModalProps) {
+export function GalleryModal({ project, onClose, onAddToCart }: GalleryModalProps) {
   if (!project) return null;
 
-  const whatsappMessage = `Olá Maiara! Gostei do kit "${project.title}" (${project.price}). Gostaria de tirar dúvidas ou fazer o pedido!`;
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
+  const hasDiscountPrice = Boolean(project.originalPrice && project.originalPrice !== project.price);
 
   return createPortal(
     <AnimatePresence>
@@ -78,7 +78,7 @@ export function GalleryModal({ project, onClose }: GalleryModalProps) {
               </p>
             </div>
             <div className="text-right">
-              {project.originalPrice && (
+              {hasDiscountPrice && (
                 <span className="block text-xs text-[#8b4114]/50 line-through">
                   {project.originalPrice}
                 </span>
@@ -111,15 +111,17 @@ export function GalleryModal({ project, onClose }: GalleryModalProps) {
 
           {/* Botão de Compra / WhatsApp */}
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => {
+                onAddToCart(project);
+                onClose();
+              }}
               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#7d876d] px-5 font-sans text-xs font-medium text-white shadow-md transition-transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <ShoppingBag className="h-4 w-4" />
-              Encomendar este Kit via WhatsApp
-            </a>
+              Adicionar ao pedido
+            </button>
           </div>
         </motion.div>
       </div>

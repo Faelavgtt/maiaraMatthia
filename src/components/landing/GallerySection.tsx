@@ -11,6 +11,15 @@ import {
   Star 
 } from "lucide-react";
 import { GalleryModal, type GalleryProject } from "./GalleryModal";
+import {
+  galleryProductFromApi,
+  galleryProductsUpdatedEvent,
+  numberGalleryProducts,
+  readGalleryProducts,
+  type GalleryProduct,
+} from "@/lib/gallery-products";
+import { listGalleryProducts } from "@/lib/api";
+import { useCart } from "@/lib/cart";
 
 const customGalleryMessage = [
   "Olá! Quero orçar uma galeria personalizada com a Maiara Mattia.",
@@ -25,6 +34,8 @@ const readyGalleryMessage = [
 
 const customGalleryUrl = `https://wa.me/?text=${encodeURIComponent(customGalleryMessage)}`;
 const readyGalleryUrl = `https://wa.me/?text=${encodeURIComponent(readyGalleryMessage)}`;
+const galleryStaticImage = "/image/fotoExemplo.jpeg";
+const galleryHoverImage = "/image/fotoExemplo1.jpeg";
 
 const galleryProjects: readonly GalleryProject[] = [
   {
@@ -43,8 +54,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Três quadros florais que conversam entre si, com uma Familinha para deixar a parede com memória e afeto.",
     placeholder: "Galeria Pronta",
-    src: "",
-    hoverSrc: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#ead4c6",
     width: 350,
     aspectRatio: "16 / 9",
@@ -65,8 +76,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Uma base pronta que pode ganhar outra paleta de cores para combinar com o quarto, sala ou brinquedoteca.",
     placeholder: "Galeria Customizável",
-    src: "",
-    hoverSrc: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#e4e7d9",
     width: 270,
     aspectRatio: "4 / 5",
@@ -88,8 +99,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Artes prontas com clima infantil, pensadas como conjunto para criar ritmo e harmonia na parede.",
     placeholder: "Kit de Quadros",
-    src: "",
-    hoverSrc: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#f0dfd4",
     width: 310,
     aspectRatio: "5 / 4",
@@ -110,8 +121,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "A Familinha entra como o ponto focal da composição, trazendo os personagens reais da sua casa.",
     placeholder: "Familinha Central",
-    src: "",
-    hoverSrc: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#e1d7c8",
     width: 250,
     aspectRatio: "3 / 4",
@@ -133,8 +144,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Para quem quer uma composição criada totalmente do zero: tema, cores, nomes e símbolos afetivos.",
     placeholder: "Orçar do Zero",
-    src: "",
-    hoverSrc: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#e6d8cf",
     width: 230,
     aspectRatio: "1 / 1",
@@ -151,10 +162,13 @@ export function GallerySection() {
   const hasDraggedRef = useRef(false);
   const pressedProjectIdRef = useRef<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const { addItem } = useCart();
   
+  const [galleryProducts, setGalleryProducts] = useState<GalleryProduct[]>(() => readGalleryProducts());
   const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
 
-  const carouselProjects = [...galleryProjects, ...galleryProjects, ...galleryProjects];
+  const activeGalleryProjects = galleryProducts;
+  const carouselProjects = [...activeGalleryProjects, ...activeGalleryProjects, ...activeGalleryProjects];
 
   const getLoopSegmentWidth = () => {
     const wall = wallRef.current;
@@ -212,7 +226,7 @@ export function GallerySection() {
     event.currentTarget.releasePointerCapture(event.pointerId);
 
     if (!hasDraggedRef.current) {
-      const project = galleryProjects.find((item) => item.id === pressedProjectIdRef.current);
+      const project = activeGalleryProjects.find((item) => item.id === pressedProjectIdRef.current);
 
       if (project) {
         setSelectedProject(project);
@@ -236,6 +250,36 @@ export function GallerySection() {
     });
 
     return () => window.cancelAnimationFrame(frame);
+  }, [galleryProducts.length]);
+
+  useEffect(() => {
+    const updateProducts = () => setGalleryProducts(readGalleryProducts());
+
+    window.addEventListener(galleryProductsUpdatedEvent, updateProducts);
+    window.addEventListener("storage", updateProducts);
+
+    return () => {
+      window.removeEventListener(galleryProductsUpdatedEvent, updateProducts);
+      window.removeEventListener("storage", updateProducts);
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    listGalleryProducts()
+      .then((data) => {
+        if (!isMounted || data.products.length === 0) return;
+        setGalleryProducts(numberGalleryProducts(data.products.map(galleryProductFromApi)));
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setGalleryProducts(readGalleryProducts());
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -382,7 +426,20 @@ export function GallerySection() {
       </div>
 
       {/* Componente Modal / Pop-up Isolado */}
-      <GalleryModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <GalleryModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+        onAddToCart={(project) =>
+          addItem({
+            productId: project.id,
+            title: project.title,
+            category: project.category,
+            price: project.price,
+            dimensions: project.dimensions,
+            imageUrl: project.src,
+          })
+        }
+      />
     </section>
   );
 }
@@ -399,6 +456,7 @@ function GalleryFrame({
   onSelect: () => void;
 }) {
   const frameWidth = `min(${Math.round(project.width * 0.96)}px, 74vw)`;
+  const hasDiscountPrice = Boolean(project.originalPrice && project.originalPrice !== project.price);
 
   return (
     <motion.article
@@ -429,8 +487,15 @@ function GalleryFrame({
       <span className="absolute left-1/2 top-[-1rem] h-6 w-px -translate-x-1/2 bg-[#f0dfd4]/85" />
 
       {/* Badge de Preço Flutuante */}
-      <div className="absolute -right-2 -top-4 z-20 rounded-full bg-[#c68043] px-2.5 py-0.5 font-sans text-[0.65rem] font-semibold text-white shadow-sm transition-transform group-hover:scale-110">
-        {project.price}
+      <div className={`absolute -right-2 -top-4 z-20 rounded-full px-2.5 py-1 font-sans text-white shadow-sm transition-transform group-hover:scale-110 ${hasDiscountPrice ? "bg-[#c68043]" : "bg-[#8b4114]"}`}>
+        {hasDiscountPrice && (
+          <span className="block text-[0.58rem] font-medium leading-none text-white/70 line-through">
+            {project.originalPrice}
+          </span>
+        )}
+        <span className="block text-[0.65rem] font-semibold leading-none">
+          {project.price}
+        </span>
       </div>
 
       <div className="relative border-[6px] border-[#f0dfd4] bg-[#fffaf5] p-2.5 shadow-[0_14px_28px_rgba(54,67,64,0.24)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(54,67,64,0.35)]">
