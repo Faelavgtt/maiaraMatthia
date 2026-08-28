@@ -1,13 +1,29 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
+export type OrderType = "familinha" | "maker" | "galeria" | "outros";
+export type OrderSource = "cart" | "maker";
+
 export type CreateOrderInput = {
   customerName: string;
   phone: string;
   email?: string;
-  product: string;
+  orderType?: OrderType;
+  source?: OrderSource;
+  product?: string;
   size?: string;
   colors?: string;
   notes?: string;
+  items?: Array<{
+    productId?: string;
+    title: string;
+    category?: string;
+    orderType?: OrderType;
+    price?: string;
+    dimensions?: string;
+    quantity: number;
+    notes?: string;
+    imageUrl?: string;
+  }>;
 };
 
 export type CreateOrderResponse = {
@@ -16,6 +32,35 @@ export type CreateOrderResponse = {
   statusUrl: string;
   uploadUrl: string;
   whatsappUrl: string | null;
+};
+
+export type GalleryProductApiRow = {
+  id: string;
+  name: string;
+  title: string;
+  category: string;
+  price: string;
+  originalPrice: string | null;
+  dimensions: string;
+  includedItems: string[];
+  description: string;
+  placeholder: string;
+  staticImage: string;
+  hoverImage: string | null;
+  surface: string;
+  frameFormat: string;
+  width: number;
+  aspectRatio: string;
+  offset: number;
+  rotate: number;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OtherProjectApiRow = GalleryProductApiRow & {
+  number: string;
+  isActive: boolean;
 };
 
 export async function createOrder(input: CreateOrderInput) {
@@ -49,6 +94,26 @@ export async function uploadOrderFile(uploadUrl: string, file: File) {
   return response.json() as Promise<{ fileId: string; objectKey: string }>;
 }
 
+export async function listGalleryProducts() {
+  const response = await fetch(`${apiBaseUrl}/api/gallery-products`);
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ products: GalleryProductApiRow[] }>;
+}
+
+export async function listOtherProjects() {
+  const response = await fetch(`${apiBaseUrl}/api/other-projects`);
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ products: OtherProjectApiRow[] }>;
+}
+
 async function readApiError(response: Response) {
   try {
     const body = await response.json();
@@ -57,4 +122,3 @@ async function readApiError(response: Response) {
     return "Erro na API";
   }
 }
-

@@ -9,7 +9,8 @@ export function AdminStatusBadge({ status }: AdminStatusBadgeProps) {
   const label = adminStatuses.find((item) => item.value === status)?.label ?? status;
 
   return (
-    <span className={`inline-flex rounded-md px-3 py-1 font-sans text-xs font-light ${statusStyles[status]}`}>
+    <span className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-4 py-2 font-sans text-sm font-medium ${statusStyles[status]}`}>
+      <span className="h-2.5 w-2.5 rounded-full" aria-hidden="true" />
       {label}
     </span>
   );

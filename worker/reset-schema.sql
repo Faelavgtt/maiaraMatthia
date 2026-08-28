@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS admin_sessions;
+DROP TABLE IF EXISTS admin_users;
+DROP TABLE IF EXISTS feedback_images;
+DROP TABLE IF EXISTS site_images;
+DROP TABLE IF EXISTS other_projects;
+DROP TABLE IF EXISTS order_files;
+DROP TABLE IF EXISTS status_events;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS gallery_products;

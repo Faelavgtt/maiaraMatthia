@@ -14,6 +14,7 @@ export interface GalleryProject {
   description: string;
   placeholder: string;
   src: string;
+  hoverSrc?: string;
   surface: string;
   width: number;
   aspectRatio: string;
@@ -24,17 +25,17 @@ export interface GalleryProject {
 interface GalleryModalProps {
   project: GalleryProject | null;
   onClose: () => void;
+  onAddToCart: (project: GalleryProject) => void;
 }
 
-export function GalleryModal({ project, onClose }: GalleryModalProps) {
+export function GalleryModal({ project, onClose, onAddToCart }: GalleryModalProps) {
   if (!project) return null;
 
-  const whatsappMessage = `Olá Maiara! Gostei do kit "${project.title}" (${project.price}). Gostaria de tirar dúvidas ou fazer o pedido!`;
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
+  const hasDiscountPrice = Boolean(project.originalPrice && project.originalPrice !== project.price);
 
   return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6">
+      <div className="fixed inset-0 z-[999] flex items-center justify-center p-3 sm:p-6">
         {/* Backdrop escurecido */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -50,7 +51,7 @@ export function GalleryModal({ project, onClose }: GalleryModalProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
-          className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border-2 border-[#e6c29c] bg-[#fffaf5] p-6 shadow-2xl sm:p-8"
+          className="relative z-10 max-h-[calc(100svh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl border-2 border-[#e6c29c] bg-[#fffaf5] p-4 shadow-2xl sm:max-h-[calc(100svh-3rem)] sm:rounded-3xl sm:p-8"
         >
           {/* Botão Fechar */}
           <button
@@ -68,33 +69,33 @@ export function GalleryModal({ project, onClose }: GalleryModalProps) {
           </div>
 
           {/* Título & Preço */}
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-[#8b4114]/10 pb-4">
+          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-[#8b4114]/10 pb-3 sm:pb-4">
             <div>
-              <h3 className="font-sans text-2xl font-normal text-[#8b4114]">{project.title}</h3>
+              <h3 className="pr-8 font-sans text-xl font-normal text-[#8b4114] sm:text-2xl">{project.title}</h3>
               <p className="mt-0.5 flex items-center gap-1 font-sans text-xs text-[#8b4114]/60">
                 <Ruler className="h-3.5 w-3.5" />
                 {project.dimensions}
               </p>
             </div>
             <div className="text-right">
-              {project.originalPrice && (
+              {hasDiscountPrice && (
                 <span className="block text-xs text-[#8b4114]/50 line-through">
                   {project.originalPrice}
                 </span>
               )}
-              <span className="font-sans text-2xl font-semibold text-[#8b4114]">
+              <span className="font-sans text-xl font-semibold text-[#8b4114] sm:text-2xl">
                 {project.price}
               </span>
             </div>
           </div>
 
           {/* Descrição */}
-          <p className="mt-4 font-sans text-sm font-light leading-relaxed text-[#8b4114]/80">
+          <p className="mt-3 font-sans text-sm font-light leading-6 text-[#8b4114]/80 sm:mt-4 sm:leading-relaxed">
             {project.description}
           </p>
 
           {/* Itens Inclusos no Kit */}
-          <div className="mt-5 rounded-2xl border border-[#e6c29c]/60 bg-[#fff9f2] p-4">
+          <div className="mt-4 rounded-xl border border-[#e6c29c]/60 bg-[#fff9f2] p-3.5 sm:mt-5 sm:rounded-2xl sm:p-4">
             <p className="font-sans text-xs font-semibold uppercase tracking-wider text-[#7d876d]">
               O que vem neste kit:
             </p>
@@ -109,16 +110,18 @@ export function GalleryModal({ project, onClose }: GalleryModalProps) {
           </div>
 
           {/* Botão de Compra / WhatsApp */}
-          <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
+          <div className="mt-5 flex flex-col gap-2.5 sm:mt-6 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => {
+                onAddToCart(project);
+                onClose();
+              }}
               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#7d876d] px-5 font-sans text-xs font-medium text-white shadow-md transition-transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <ShoppingBag className="h-4 w-4" />
-              Encomendar este Kit via WhatsApp
-            </a>
+              Adicionar ao pedido
+            </button>
           </div>
         </motion.div>
       </div>

@@ -1,7 +1,7 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, LockKeyhole, LogIn, Mail, ShieldCheck, Sparkles } from "lucide-react";
-import { getAdminSession, signInAdmin } from "@/lib/admin-auth";
+import { getAdminSession, signInAdmin, type AdminSession } from "@/lib/admin-auth";
 
 type LoginLocationState = {
   from?: string;
@@ -10,27 +10,63 @@ type LoginLocationState = {
 const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [session, setSession] = useState<AdminSession | null>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const session = getAdminSession();
   const from = (location.state as LoginLocationState | null)?.from ?? "/admin";
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getAdminSession().then((currentSession) => {
+      if (!isMounted) return;
+      setSession(currentSession);
+      setIsCheckingSession(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (isCheckingSession) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#d19c88] px-5 text-[#8b4114]">
+        <div className="rounded-xl border border-white/45 bg-[#fffaf5] px-5 py-4 text-center shadow-[0_18px_45px_rgba(93,51,29,0.12)]">
+          <p className="font-sans text-sm font-light">Preparando acesso...</p>
+        </div>
+      </main>
+    );
+  }
 
   if (session) {
     return <Navigate to={from} replace />;
   }
 
-  const submitLogin = (event: FormEvent<HTMLFormElement>) => {
+  const submitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
+
     const data = new FormData(event.currentTarget);
-    const email = String(data.get("email") ?? "").trim();
+    const login = String(data.get("login") ?? "").trim();
     const password = String(data.get("password") ?? "");
 
-    if (!email || !password) {
-      setError("Preencha email e senha para acessar.");
+    if (!login || !password) {
+      setError("Preencha usuario ou email e senha para acessar.");
       return;
     }
 
-    signInAdmin(email);
-    navigate(from, { replace: true });
+    setIsSubmitting(true);
+
+    try {
+      await signInAdmin(login, password);
+      navigate(from, { replace: true });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Não foi possível entrar.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -90,7 +126,7 @@ const AdminLogin = () => {
             Um cantinho reservado para cuidar dos projetos.
           </h1>
           <p className="mt-4 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/82 sm:mt-5 sm:text-lg sm:leading-8">
-            Entre para acompanhar orcamentos, organizar conversas e guardar cada etapa com a mesma delicadeza do atelie.
+            Entre para acompanhar orçamentos, organizar conversas e guardar cada etapa com a mesma delicadeza do ateliê.
           </p>
 
           <div className="mt-7 hidden max-w-lg gap-3 sm:grid sm:grid-cols-2">
@@ -99,7 +135,7 @@ const AdminLogin = () => {
               <p className="mt-3 font-sans text-xs font-light leading-5 text-[#8b4114]/78">Orcamentos, pedidos e contatos em um fluxo simples.</p>
             </div>
             <div className="rotate-1 rounded-[1rem_1.5rem_1rem_1.7rem] border border-white/45 bg-[#f9e7d6]/50 p-4 backdrop-blur-sm">
-              <p className="font-sans text-xs font-normal uppercase tracking-[0.14em] text-[#76877e]">Atelie online</p>
+              <p className="font-sans text-xs font-normal uppercase tracking-[0.14em] text-[#76877e]">Ateliê online</p>
               <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114]/78">Acesso interno para organizar a parte silenciosa do trabalho.</p>
             </div>
           </div>
@@ -114,20 +150,21 @@ const AdminLogin = () => {
             <p className="font-sans text-xs font-normal uppercase tracking-[0.18em] text-[#76877e]">Login</p>
             <h2 className="mt-2 font-sans text-2xl font-extralight text-[#8b4114]">Entrar no painel</h2>
             <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114]/65">
-              Use suas credenciais para acessar a area administrativa.
+              Use seu usuario ou email cadastrado pelo administrador principal.
             </p>
           </div>
 
           <form onSubmit={submitLogin} className="space-y-4">
             <label className="block font-sans text-sm font-light text-[#8b4114]">
-              Email
+              Usuario ou email
               <span className="mt-2 flex h-12 items-center gap-2 rounded-full border border-[#ddb8a6] bg-white px-4 shadow-[0_8px_20px_rgba(93,51,29,0.05)] focus-within:border-[#c68043]">
                 <Mail className="h-4 w-4 shrink-0 text-[#76877e]" />
                 <input
-                  name="email"
-                  type="email"
+                  name="login"
+                  type="text"
+                  autoComplete="username"
                   className="w-full bg-transparent font-sans text-sm font-light outline-none"
-                  placeholder="admin@email.com"
+                  placeholder="maiara ou email@exemplo.com"
                 />
               </span>
             </label>
@@ -139,6 +176,7 @@ const AdminLogin = () => {
                 <input
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   className="w-full bg-transparent font-sans text-sm font-light outline-none"
                   placeholder="Digite sua senha"
                 />
@@ -151,10 +189,14 @@ const AdminLogin = () => {
               </p>
             )}
 
-            <button className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#7d876d] px-5 font-sans text-base font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5">
-              Entrar
+            <button disabled={isSubmitting} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#7d876d] px-5 font-sans text-base font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70">
+              {isSubmitting ? "Entrando..." : "Entrar"}
               <LogIn className="h-4 w-4" />
             </button>
+
+            <p className="rounded-md bg-[#f8f1e9] px-3 py-2 text-center font-sans text-xs font-light leading-5 text-[#8b4114]/70">
+              Se você ainda não tem acesso, peça para o administrador principal criar seu usuário.
+            </p>
           </form>
         </section>
       </div>

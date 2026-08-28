@@ -11,6 +11,16 @@ import {
   Star 
 } from "lucide-react";
 import { GalleryModal, type GalleryProject } from "./GalleryModal";
+import {
+  galleryProductFromApi,
+  galleryProductsUpdatedEvent,
+  numberGalleryProducts,
+  readGalleryProducts,
+  type GalleryProduct,
+} from "@/lib/gallery-products";
+import { listGalleryProducts } from "@/lib/api";
+import { useCart } from "@/lib/cart";
+import { buildWhatsappUrl } from "@/lib/whatsapp";
 
 const customGalleryMessage = [
   "Olá! Quero orçar uma galeria personalizada com a Maiara Mattia.",
@@ -23,8 +33,10 @@ const readyGalleryMessage = [
   "Tenho interesse em escolher uma arte pronta e customizar as cores.",
 ].join("\n");
 
-const customGalleryUrl = `https://wa.me/?text=${encodeURIComponent(customGalleryMessage)}`;
-const readyGalleryUrl = `https://wa.me/?text=${encodeURIComponent(readyGalleryMessage)}`;
+const customGalleryUrl = buildWhatsappUrl(customGalleryMessage);
+const readyGalleryUrl = buildWhatsappUrl(readyGalleryMessage);
+const galleryStaticImage = "/image/fotoExemplo.jpeg";
+const galleryHoverImage = "/image/fotoExemplo1.jpeg";
 
 const galleryProjects: readonly GalleryProject[] = [
   {
@@ -43,7 +55,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Três quadros florais que conversam entre si, com uma Familinha para deixar a parede com memória e afeto.",
     placeholder: "Galeria Pronta",
-    src: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#ead4c6",
     width: 350,
     aspectRatio: "16 / 9",
@@ -64,7 +77,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Uma base pronta que pode ganhar outra paleta de cores para combinar com o quarto, sala ou brinquedoteca.",
     placeholder: "Galeria Customizável",
-    src: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#e4e7d9",
     width: 270,
     aspectRatio: "4 / 5",
@@ -86,7 +100,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Artes prontas com clima infantil, pensadas como conjunto para criar ritmo e harmonia na parede.",
     placeholder: "Kit de Quadros",
-    src: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#f0dfd4",
     width: 310,
     aspectRatio: "5 / 4",
@@ -107,7 +122,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "A Familinha entra como o ponto focal da composição, trazendo os personagens reais da sua casa.",
     placeholder: "Familinha Central",
-    src: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#e1d7c8",
     width: 250,
     aspectRatio: "3 / 4",
@@ -129,7 +145,8 @@ const galleryProjects: readonly GalleryProject[] = [
     ],
     description: "Para quem quer uma composição criada totalmente do zero: tema, cores, nomes e símbolos afetivos.",
     placeholder: "Orçar do Zero",
-    src: "",
+    src: galleryStaticImage,
+    hoverSrc: galleryHoverImage,
     surface: "#e6d8cf",
     width: 230,
     aspectRatio: "1 / 1",
@@ -146,10 +163,13 @@ export function GallerySection() {
   const hasDraggedRef = useRef(false);
   const pressedProjectIdRef = useRef<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const { addItem } = useCart();
   
+  const [galleryProducts, setGalleryProducts] = useState<GalleryProduct[]>(() => readGalleryProducts());
   const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
 
-  const carouselProjects = [...galleryProjects, ...galleryProjects, ...galleryProjects];
+  const activeGalleryProjects = galleryProducts;
+  const carouselProjects = [...activeGalleryProjects, ...activeGalleryProjects, ...activeGalleryProjects];
 
   const getLoopSegmentWidth = () => {
     const wall = wallRef.current;
@@ -207,7 +227,7 @@ export function GallerySection() {
     event.currentTarget.releasePointerCapture(event.pointerId);
 
     if (!hasDraggedRef.current) {
-      const project = galleryProjects.find((item) => item.id === pressedProjectIdRef.current);
+      const project = activeGalleryProjects.find((item) => item.id === pressedProjectIdRef.current);
 
       if (project) {
         setSelectedProject(project);
@@ -231,6 +251,36 @@ export function GallerySection() {
     });
 
     return () => window.cancelAnimationFrame(frame);
+  }, [galleryProducts.length]);
+
+  useEffect(() => {
+    const updateProducts = () => setGalleryProducts(readGalleryProducts());
+
+    window.addEventListener(galleryProductsUpdatedEvent, updateProducts);
+    window.addEventListener("storage", updateProducts);
+
+    return () => {
+      window.removeEventListener(galleryProductsUpdatedEvent, updateProducts);
+      window.removeEventListener("storage", updateProducts);
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    listGalleryProducts()
+      .then((data) => {
+        if (!isMounted || data.products.length === 0) return;
+        setGalleryProducts(numberGalleryProducts(data.products.map(galleryProductFromApi)));
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setGalleryProducts(readGalleryProducts());
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -242,7 +292,7 @@ export function GallerySection() {
   }, []);
 
   return (
-    <section id="galeria" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-16 pt-3 sm:px-8 md:pb-20 md:pt-5">
+    <section id="galeria" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-12 pt-3 sm:px-8 md:pb-16 md:pt-5 xl:pb-20">
       
       {/* Background Decorativo */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
@@ -250,14 +300,14 @@ export function GallerySection() {
 
         
 
-z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
+        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
         <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-[#f5dfb8]/40 blur-3xl" />
 
         <Star className="absolute left-[6%] bottom-20 h-8 w-8 -rotate-12 fill-[#7d876d] text-[#7d876d]/80" />
       </div>
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-6 border-b border-[#8b4114]/12 pb-8 lg:grid-cols-[1fr_0.78fr] lg:items-end">
+        <div className="grid gap-5 border-b border-[#8b4114]/12 pb-6 md:gap-6 md:pb-8 lg:grid-cols-[1fr_0.78fr] lg:items-end">
           
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -271,20 +321,20 @@ z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-
               GALERIAS PRONTAS & KITS
             </div>
 
-            <h2 className="mt-3 font-sans text-3xl font-light leading-tight text-[#8b4114] sm:text-4xl md:text-[2.5rem]">
+            <h2 className="mt-3 font-sans text-[1.85rem] font-light leading-tight text-[#8b4114] sm:text-3xl md:text-[2.35rem] xl:text-[2.5rem]">
               Três quadros que se conversam, mais uma Familinha para fechar a história.
             </h2>
-            <p className="mt-3 max-w-2xl font-sans text-sm font-light leading-relaxed text-[#8b4114]/80 sm:text-base">
+            <p className="mt-3 max-w-2xl font-sans text-sm font-light leading-6 text-[#8b4114]/80 sm:text-base sm:leading-relaxed">
               Explore nossos conjuntos prontos para parede. Clique em qualquer opção para ver os detalhes do kit, dimensões e encomendar o seu conjunto.
             </p>
           </motion.div>
 
-          <div className="relative -rotate-1 rounded-2xl border-2 border-dashed border-[#e6c29c] bg-[#fff9f2] p-5 shadow-sm transition-all duration-300 hover:rotate-0">
+          <div className="relative rounded-xl border-2 border-dashed border-[#e6c29c] bg-[#fff9f2] p-4 shadow-sm transition-all duration-300 hover:rotate-0 sm:-rotate-1 sm:rounded-2xl sm:p-5">
             <span className="inline-flex items-center gap-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-wider text-[#7d876d]">
               <Heart className="h-3 w-3 fill-[#7d876d]" />
               Pronta ou sob medida?
             </span>
-            <h3 className="mt-1 font-sans text-xl font-normal leading-tight text-[#8b4114]">
+            <h3 className="mt-1 font-sans text-lg font-normal leading-tight text-[#8b4114] sm:text-xl">
               Escolha uma galeria pronta ou peça um projeto exclusivo.
             </h3>
             <p className="mt-2 font-sans text-xs font-light leading-relaxed text-[#8b4114]/75">
@@ -313,7 +363,7 @@ z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3 sm:mt-6">
           <p className="font-sans text-[0.7rem] font-medium uppercase tracking-wider text-[#8b4114]/60">
             ↔ Arraste a parede para explorar os kits
           </p>
@@ -339,7 +389,7 @@ z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-
         </div>
 
         {/* --- CARROSSEL --- */}
-        <div className="mt-4 rounded-xl bg-[#979f8a] shadow-inner">
+        <div className="mt-3 rounded-xl bg-[#979f8a] shadow-inner sm:mt-4">
           <div
             ref={wallRef}
             onPointerDown={startWallDrag}
@@ -348,7 +398,7 @@ z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-
             onPointerCancel={stopWallDrag}
             onPointerLeave={stopWallDrag}
             onScroll={syncLoopPosition}
-            className="flex min-h-[31rem] cursor-grab select-none items-start gap-9 overflow-x-auto px-10 pb-9 pt-12 active:cursor-grabbing sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-h-[22rem] cursor-grab select-none items-start gap-5 overflow-x-auto px-5 pb-6 pt-8 active:cursor-grabbing sm:min-h-[25rem] sm:gap-7 sm:px-8 sm:pb-8 sm:pt-10 md:min-h-[28rem] md:gap-8 md:px-10 xl:min-h-[31rem] xl:gap-9 xl:px-10 xl:pb-9 xl:pt-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {carouselProjects.map((project, index) => (
               <GalleryFrame 
@@ -363,7 +413,10 @@ z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-
         </div>
 
         {/* Rodapé da Seção */}
-        <div className="mt-6 flex flex-col gap-3 border-t border-[#8b4114]/12 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 border-t border-[#8b4114]/12 pt-4 sm:flex-row sm:items-center sm:justify-between md:mt-6 md:pt-5">
+          <p className="max-w-xl font-sans text-xs font-light leading-5 text-[#8b4114]/65">
+            Quer adaptar tema, cores ou medidas? O orçamento começa com uma mensagem rápida no WhatsApp para entendermos a parede e o estilo desejado.
+          </p>
           <a
             href={customGalleryUrl}
             target="_blank"
@@ -377,7 +430,21 @@ z        <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-
       </div>
 
       {/* Componente Modal / Pop-up Isolado */}
-      <GalleryModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <GalleryModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+        onAddToCart={(project) =>
+          addItem({
+            productId: project.id,
+            title: project.title,
+            category: project.category,
+            orderType: "galeria",
+            price: project.price,
+            dimensions: project.dimensions,
+            imageUrl: project.src,
+          })
+        }
+      />
     </section>
   );
 }
@@ -394,6 +461,7 @@ function GalleryFrame({
   onSelect: () => void;
 }) {
   const frameWidth = `min(${Math.round(project.width * 0.96)}px, 74vw)`;
+  const hasDiscountPrice = Boolean(project.originalPrice && project.originalPrice !== project.price);
 
   return (
     <motion.article
@@ -424,8 +492,15 @@ function GalleryFrame({
       <span className="absolute left-1/2 top-[-1rem] h-6 w-px -translate-x-1/2 bg-[#f0dfd4]/85" />
 
       {/* Badge de Preço Flutuante */}
-      <div className="absolute -right-2 -top-4 z-20 rounded-full bg-[#c68043] px-2.5 py-0.5 font-sans text-[0.65rem] font-semibold text-white shadow-sm transition-transform group-hover:scale-110">
-        {project.price}
+      <div className={`absolute -right-2 -top-4 z-20 rounded-full px-2.5 py-1 font-sans text-white shadow-sm transition-transform group-hover:scale-110 ${hasDiscountPrice ? "bg-[#c68043]" : "bg-[#8b4114]"}`}>
+        {hasDiscountPrice && (
+          <span className="block text-[0.58rem] font-medium leading-none text-white/70 line-through">
+            {project.originalPrice}
+          </span>
+        )}
+        <span className="block text-[0.65rem] font-semibold leading-none">
+          {project.price}
+        </span>
       </div>
 
       <div className="relative border-[6px] border-[#f0dfd4] bg-[#fffaf5] p-2.5 shadow-[0_14px_28px_rgba(54,67,64,0.24)] transition-shadow duration-300 group-hover:shadow-[0_20px_35px_rgba(54,67,64,0.35)]">
@@ -437,7 +512,23 @@ function GalleryFrame({
           }}
         >
           {project.src ? (
-            <img src={project.src} alt={project.title} className="h-full w-full object-cover" draggable="false" />
+            <>
+              <img
+                src={project.src}
+                alt={project.title}
+                className="h-full w-full object-cover transition-opacity duration-500 ease-out group-hover:opacity-0 group-focus-visible:opacity-0"
+                draggable="false"
+              />
+              {project.hoverSrc && (
+                <img
+                  src={project.hoverSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+                  draggable="false"
+                />
+              )}
+            </>
           ) : (
             <div className="absolute inset-4 flex flex-col items-center justify-center bg-[#fffaf5]/85 px-5 text-center text-[#8b4114]">
               <ImageIcon className="h-8 w-8" aria-hidden="true" />
@@ -446,19 +537,6 @@ function GalleryFrame({
             </div>
           )}
 
-          {/* Overlay de Hover */}
-          <div className="absolute inset-0 flex items-center justify-center bg-[#1f1713]/72 p-3 text-center text-[#8b4114] opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
-            <div className="flex max-h-full w-full flex-col items-center justify-center rounded-xl bg-[#fffaf5]/95 px-3 py-4 shadow-md">
-              <p className="font-sans text-[0.58rem] font-semibold uppercase leading-3 tracking-wider text-[#7d876d]">
-                {project.number} · {project.category}
-              </p>
-              <h3 className="mt-1 font-sans text-base font-normal leading-tight text-[#8b4114]">{project.title}</h3>
-              <p className="mt-1 font-sans text-sm font-semibold text-[#8b4114]">{project.price}</p>
-              <span className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#8b4114] px-3 py-1 font-sans text-[0.65rem] font-medium text-white shadow-xs">
-                Ver detalhes e comprar
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 

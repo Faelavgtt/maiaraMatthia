@@ -63,7 +63,7 @@ const familyFrames = [
 
 export function FamilinhaSection() {
   return (
-    <section id="familinha" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-24 pt-14 sm:px-8 md:pb-28 md:pt-16">
+    <section id="familinha" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-14 pt-12 sm:px-8 md:pb-20 md:pt-16 xl:pb-28">
       
       {/* Background Ilustrado Estilo Infância */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
@@ -80,7 +80,7 @@ export function FamilinhaSection() {
         <Star className="absolute bottom-16 right-[6%] h-9 w-9 -rotate-12 fill-[#7d876d] text-[#7d876d]/80" />
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+      <div className="mx-auto grid max-w-7xl gap-8 md:gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center xl:gap-12">
         
         {/* Coluna de Texto e Cards Informativos */}
         <motion.div
@@ -94,15 +94,15 @@ export function FamilinhaSection() {
             A FAMILINHA
           </div>
 
-          <h2 className="mt-8 max-w-2xl font-sans text-3xl font-light leading-tight text-[#8b4114] sm:text-4xl md:text-[2.6rem]">
+          <h2 className="mt-5 max-w-2xl font-sans text-[1.85rem] font-light leading-tight text-[#8b4114] sm:mt-7 sm:text-4xl md:text-[2.45rem] xl:mt-8 xl:text-[2.6rem]">
             Uma arte feita à mão para apresentar quem mora no seu coração.
           </h2>
 
-          <p className="mt-4 max-w-xl font-sans text-sm font-light leading-relaxed text-[#8b4114]/80 sm:text-base">
+          <p className="mt-3 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/80 sm:mt-4 sm:text-base sm:leading-relaxed">
             A Familinha é uma ilustração autoral da Maiara com os membros da família em clima de desenho infantil: simples, afetuosa e cheia de pequenas pistas sobre cada pessoa.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:mt-7 sm:grid-cols-3 sm:gap-4 xl:mt-8">
             {familyCards.map((card, idx) => {
               const Icon = card.icon;
               return (
@@ -113,7 +113,7 @@ export function FamilinhaSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                   whileHover={{ y: -6, rotate: 0, scale: 1.02 }}
-                  className={`relative min-h-[10.5rem] rounded-2xl p-4 shadow-sm transition-all duration-300 ${card.bgStyle} ${card.rotate}`}
+                  className={`relative rounded-xl p-3.5 shadow-sm transition-all duration-300 sm:min-h-[10.5rem] sm:rounded-2xl sm:p-4 ${card.bgStyle} ${card.rotate}`}
                 >
                   <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.badgeColor} text-[#8b4114] shadow-xs`}>
                     <Icon className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function FamilinhaSection() {
           
           
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {familyFrames.map((frame, index) => (
               <motion.figure
                 key={frame.src}
@@ -150,16 +150,16 @@ export function FamilinhaSection() {
                   transition: { type: "spring", stiffness: 300, damping: 18 }
                 }}
                 transition={{ duration: 0.6, delay: index * 0.15 }}
-                className={`relative group ${frame.positionClass}`}
+                className={`relative group mobile-soften-tilt ${frame.positionClass}`}
               >
                 {/* Pregador / Fita Adesiva decorativa no topo */}
                 <div className={`absolute -top-3 left-1/2 z-20 h-5 w-16 -translate-x-1/2 rounded-sm ${frame.tapeColor} shadow-xs backdrop-blur-xs border border-white/40`} aria-hidden="true" />
 
                 {/* Card Moldura Estilo Foto Polaroid Infantil */}
-                <div className={`rounded-[1.8rem_1rem_1.6rem_1.2rem] border-4 ${frame.frameBorder} bg-white p-2 pb-3.5 shadow-[0_10px_25px_rgba(139,65,20,0.07)] transition-all duration-300 group-hover:shadow-[0_18px_36px_rgba(139,65,20,0.14)]`}>
+                <div className={`rounded-[1rem] border-2 ${frame.frameBorder} bg-white p-1.5 pb-2.5 shadow-[0_10px_25px_rgba(139,65,20,0.07)] transition-all duration-300 group-hover:shadow-[0_18px_36px_rgba(139,65,20,0.14)] sm:rounded-[1.8rem_1rem_1.6rem_1.2rem] sm:border-4 sm:p-2 sm:pb-3.5`}>
                   
                   {/* Container da Imagem */}
-                  <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[1.2rem_0.8rem_1rem_0.8rem] bg-[#fdfaf6] ring-1 ring-[#8b4114]/5">
+                  <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[0.75rem] bg-[#fdfaf6] ring-1 ring-[#8b4114]/5 sm:rounded-[1.2rem_0.8rem_1rem_0.8rem]">
                     <motion.img
                       src={frame.src}
                       alt={frame.alt}
