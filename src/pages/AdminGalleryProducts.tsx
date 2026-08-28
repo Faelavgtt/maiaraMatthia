@@ -12,6 +12,12 @@ import {
   updateAdminGalleryProduct,
 } from "@/lib/admin-api";
 import {
+  adminDraftKeys,
+  readAdminProductDraft,
+  removeAdminProductDraft,
+  writeAdminProductDraft,
+} from "@/lib/admin-drafts";
+import {
   galleryProductFromApi,
   getGalleryFrameFormat,
   numberGalleryProducts,
@@ -44,8 +50,10 @@ const emptyForm: ProductForm = {
 
 const AdminGalleryProducts = () => {
   const [products, setProducts] = useState<GalleryProduct[]>(() => readGalleryProducts());
-  const [form, setForm] = useState<ProductForm>(emptyForm);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [form, setForm] = useState<ProductForm>(() => readAdminProductDraft(adminDraftKeys.galleryProduct, emptyForm).form);
+  const [editingProductId, setEditingProductId] = useState<string | null>(
+    () => readAdminProductDraft(adminDraftKeys.galleryProduct, emptyForm).editingProductId,
+  );
   const [statusMessage, setStatusMessage] = useState("Carregando produtos da galeria...");
   const [isSaving, setIsSaving] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -53,6 +61,10 @@ const AdminGalleryProducts = () => {
 
   const selectedFormat = getGalleryFrameFormat(form.frameFormat);
   const includedItems = form.includedItems.split("\n").map((item) => item.trim()).filter(Boolean);
+
+  useEffect(() => {
+    writeAdminProductDraft(adminDraftKeys.galleryProduct, { form, editingProductId }, emptyForm);
+  }, [editingProductId, form]);
 
   const updateForm = <Key extends keyof ProductForm>(key: Key, value: ProductForm[Key]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -83,7 +95,18 @@ const AdminGalleryProducts = () => {
     setStatusMessage(`Editando ${product.title}.`);
   };
 
+  const duplicateProduct = (product: GalleryProduct) => {
+    setEditingProductId(null);
+    setForm({
+      ...galleryProductToForm(product),
+      name: `${product.name} copia`,
+      title: `${product.title} copia`,
+    });
+    setStatusMessage(`Rascunho duplicado de ${product.title}. Ajuste e salve como novo produto.`);
+  };
+
   const cancelEditingProduct = () => {
+    removeAdminProductDraft(adminDraftKeys.galleryProduct);
     setEditingProductId(null);
     setForm(emptyForm);
     setStatusMessage("Edicao cancelada.");
@@ -166,6 +189,7 @@ const AdminGalleryProducts = () => {
       setProducts(nextProducts);
       writeGalleryProducts(nextProducts);
       setStatusMessage(editingProductId ? "Produto atualizado com sucesso." : "Produto salvo com sucesso.");
+      removeAdminProductDraft(adminDraftKeys.galleryProduct);
       setEditingProductId(null);
       setForm(emptyForm);
     } catch {
@@ -177,6 +201,7 @@ const AdminGalleryProducts = () => {
       setProducts(nextProducts);
       writeGalleryProducts(nextProducts);
       setStatusMessage(`${editingProductId ? "Produto atualizado" : "Produto salvo"} nesta sessao. Tente salvar novamente mais tarde.`);
+      removeAdminProductDraft(adminDraftKeys.galleryProduct);
       setEditingProductId(null);
       setForm(emptyForm);
     } finally {
@@ -203,7 +228,7 @@ const AdminGalleryProducts = () => {
   };
 
   return (
-    <section className="px-4 py-4 sm:px-5 lg:h-screen lg:overflow-hidden lg:px-6">
+    <section className="px-4 py-4 sm:px-5 lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:px-6">
       <div className="mx-auto flex h-full max-w-[96rem] flex-col">
         <AdminGalleryHeader statusMessage={statusMessage} productsCount={products.length} />
 
@@ -220,7 +245,12 @@ const AdminGalleryProducts = () => {
             onOpenLibrary={openLibrary}
           />
 
-          <AdminGalleryProductsList products={products} onEditProduct={startEditingProduct} onRemoveProduct={removeProduct} />
+          <AdminGalleryProductsList
+            products={products}
+            onEditProduct={startEditingProduct}
+            onDuplicateProduct={duplicateProduct}
+            onRemoveProduct={removeProduct}
+          />
         </div>
       </div>
 

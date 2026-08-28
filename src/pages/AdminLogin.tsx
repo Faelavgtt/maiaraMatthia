@@ -33,8 +33,8 @@ const AdminLogin = () => {
   if (isCheckingSession) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#d19c88] px-5 text-[#8b4114]">
-        <div className="rounded-xl border border-white/45 bg-[#fffaf5] px-5 py-4 text-center shadow-[0_18px_45px_rgba(93,51,29,0.12)]">
-          <p className="font-sans text-sm font-light">Preparando acesso...</p>
+        <div className="rounded-2xl border border-white/45 bg-[#fffaf5] px-6 py-5 text-center shadow-[0_18px_45px_rgba(93,51,29,0.12)]">
+          <p className="font-sans text-sm font-light text-[#8b4114]">Preparando acesso ao ateliê...</p>
         </div>
       </main>
     );
@@ -53,7 +53,7 @@ const AdminLogin = () => {
     const password = String(data.get("password") ?? "");
 
     if (!login || !password) {
-      setError("Preencha usuario ou email e senha para acessar.");
+      setError("Preencha usuário ou e-mail e senha para acessar.");
       return;
     }
 
@@ -71,6 +71,7 @@ const AdminLogin = () => {
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-[#d19c88] px-5 py-6 text-[#8b4114] sm:px-8">
+      {/* Decorative Botanical Elements */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <img
           src="/image/elementosFloral/floral7.png"
@@ -96,17 +97,18 @@ const AdminLogin = () => {
 
       <a
         href="/"
-        className="relative z-10 inline-flex h-10 items-center gap-2 rounded-full border border-white/45 bg-white/20 px-4 font-sans text-sm font-light text-[#8b4114] backdrop-blur-sm transition-transform hover:-translate-y-0.5"
+        className="relative z-10 inline-flex h-9 items-center gap-2 rounded-xl border border-white/45 bg-white/20 px-3.5 font-sans text-xs font-light text-[#8b4114] backdrop-blur-xs transition-colors hover:bg-white/30"
       >
-        <ArrowLeft className="h-4 w-4" />
-        Voltar ao site
+        <ArrowLeft className="h-3.5 w-3.5" />
+        <span>Voltar à loja</span>
       </a>
 
-      <div className="mx-auto grid max-w-6xl items-center gap-6 py-6 lg:min-h-[calc(100vh-5rem)] lg:grid-cols-[1.02fr_0.98fr] lg:gap-8 lg:py-8">
-        <section className="relative max-w-2xl">
+      <div className="mx-auto grid max-w-6xl items-center gap-8 py-6 lg:min-h-[calc(100vh-6rem)] lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+        {/* Left Intro Hero */}
+        <section className="relative max-w-xl">
           <span
             aria-hidden="true"
-            className="block h-14 w-28 bg-[#f9e7d6] sm:h-20 sm:w-36"
+            className="block h-14 w-32 bg-[#f9e7d6] sm:h-18 sm:w-40"
             style={{
               WebkitMaskImage: 'url("/logoMaiara.svg")',
               maskImage: 'url("/logoMaiara.svg")',
@@ -118,84 +120,102 @@ const AdminLogin = () => {
               maskSize: "contain",
             }}
           />
-          <p className="mt-5 inline-flex items-center gap-2 font-sans text-[0.68rem] font-normal uppercase tracking-[0.2em] text-white sm:mt-8">
+
+          <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white/30 px-3 py-1 font-sans text-xs font-medium uppercase tracking-[0.16em] text-[#8b4114] backdrop-blur-xs">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Painel administrativo
-          </p>
-          <h1 className="mt-3 max-w-xl font-sans text-3xl font-extralight leading-[1.08] text-[#8b4114] sm:mt-4 sm:text-5xl lg:text-6xl">
-            Um cantinho reservado para cuidar dos projetos.
+            <span>Painel Administrativo</span>
+          </div>
+
+          <h1 className="mt-3 font-sans text-3xl font-light leading-tight text-[#8b4114] sm:text-4xl lg:text-5xl">
+            Gestão elegante e centralizada do ateliê.
           </h1>
-          <p className="mt-4 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/82 sm:mt-5 sm:text-lg sm:leading-8">
-            Entre para acompanhar orçamentos, organizar conversas e guardar cada etapa com a mesma delicadeza do ateliê.
+
+          <p className="mt-4 font-sans text-sm sm:text-base font-light leading-relaxed text-[#8b4114]/85">
+            Acompanhe pedidos, clientes, orçamentos e personalize sua galeria de arte com facilidade e precisão.
           </p>
 
-          <div className="mt-7 hidden max-w-lg gap-3 sm:grid sm:grid-cols-2">
-            <div className="-rotate-1 rounded-[1.5rem_0.9rem_1.7rem_1rem] border border-white/45 bg-white/25 p-4 backdrop-blur-sm">
-              <Sparkles className="h-5 w-5 text-[#f9e7d6]" />
-              <p className="mt-3 font-sans text-xs font-light leading-5 text-[#8b4114]/78">Orcamentos, pedidos e contatos em um fluxo simples.</p>
+          <div className="mt-8 hidden gap-3 sm:grid sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/40 bg-white/20 p-4 backdrop-blur-xs">
+              <Sparkles className="h-5 w-5 text-[#8b4114]" />
+              <p className="mt-2.5 font-sans text-xs font-light leading-relaxed text-[#8b4114]/90">
+                Orçamentos e pedidos centralizados em um fluxo simples.
+              </p>
             </div>
-            <div className="rotate-1 rounded-[1rem_1.5rem_1rem_1.7rem] border border-white/45 bg-[#f9e7d6]/50 p-4 backdrop-blur-sm">
-              <p className="font-sans text-xs font-normal uppercase tracking-[0.14em] text-[#76877e]">Ateliê online</p>
-              <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114]/78">Acesso interno para organizar a parte silenciosa do trabalho.</p>
+            <div className="rounded-2xl border border-white/40 bg-white/20 p-4 backdrop-blur-xs">
+              <span className="block font-sans text-[11px] font-semibold uppercase tracking-wider text-[#8b4114]">
+                Ateliê Online
+              </span>
+              <p className="mt-2.5 font-sans text-xs font-light leading-relaxed text-[#8b4114]/90">
+                Acesso seguro e restrito para administrar todo o catálogo.
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="relative rounded-[2rem_1.2rem_2.3rem_1.35rem] border border-white/55 bg-[#fffaf5] p-5 shadow-[0_28px_70px_rgba(93,51,29,0.18)] sm:p-7">
-          <span className="absolute left-1/2 top-0 h-8 w-32 -translate-x-1/2 -translate-y-1/2 rotate-2 bg-[#e4e7d9] opacity-95 shadow-sm" aria-hidden="true" />
-          <span className="absolute -right-4 top-24 h-5 w-5 rounded-full bg-[#7d876d]" aria-hidden="true" />
-          <span className="absolute -right-8 top-16 h-3 w-3 rounded-full bg-[#ddb8a6]" aria-hidden="true" />
-
-          <div className="mb-6 rounded-[1.4rem_0.8rem_1.4rem_0.8rem] bg-[#f8f1e9] p-4">
-            <p className="font-sans text-xs font-normal uppercase tracking-[0.18em] text-[#76877e]">Login</p>
-            <h2 className="mt-2 font-sans text-2xl font-extralight text-[#8b4114]">Entrar no painel</h2>
-            <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114]/65">
-              Use seu usuario ou email cadastrado pelo administrador principal.
+        {/* Right Login Card */}
+        <section className="relative rounded-3xl border border-white/60 bg-[#fffaf5] p-6 sm:p-8 shadow-[0_24px_60px_rgba(93,51,29,0.15)]">
+          <div className="mb-6 rounded-2xl bg-[#f8f1e9] p-4 border border-[#8b4114]/10">
+            <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-[#76877e]">
+              Acesso Seguro
+            </p>
+            <h2 className="mt-1 font-sans text-2xl font-light text-[#8b4114]">Entrar no Painel</h2>
+            <p className="mt-1 font-sans text-xs font-light text-[#8b4114]/70">
+              Digite seu usuário ou e-mail e senha para continuar.
             </p>
           </div>
 
           <form onSubmit={submitLogin} className="space-y-4">
-            <label className="block font-sans text-sm font-light text-[#8b4114]">
-              Usuario ou email
-              <span className="mt-2 flex h-12 items-center gap-2 rounded-full border border-[#ddb8a6] bg-white px-4 shadow-[0_8px_20px_rgba(93,51,29,0.05)] focus-within:border-[#c68043]">
+            <label className="block">
+              <span className="mb-1.5 block font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-[#76877e]">
+                Usuário ou E-mail
+              </span>
+              <div className="flex h-11 items-center gap-2 rounded-xl border border-[#8b4114]/15 bg-white px-3.5 shadow-xs transition-all focus-within:border-[#8b4114]">
                 <Mail className="h-4 w-4 shrink-0 text-[#76877e]" />
                 <input
                   name="login"
                   type="text"
                   autoComplete="username"
-                  className="w-full bg-transparent font-sans text-sm font-light outline-none"
-                  placeholder="maiara ou email@exemplo.com"
+                  required
+                  className="w-full bg-transparent font-sans text-xs sm:text-sm font-light text-[#8b4114] outline-none placeholder:text-[#76877e]/60"
+                  placeholder="usuario ou email@exemplo.com"
                 />
-              </span>
+              </div>
             </label>
 
-            <label className="block font-sans text-sm font-light text-[#8b4114]">
-              Senha
-              <span className="mt-2 flex h-12 items-center gap-2 rounded-full border border-[#ddb8a6] bg-white px-4 shadow-[0_8px_20px_rgba(93,51,29,0.05)] focus-within:border-[#c68043]">
+            <label className="block">
+              <span className="mb-1.5 block font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-[#76877e]">
+                Senha
+              </span>
+              <div className="flex h-11 items-center gap-2 rounded-xl border border-[#8b4114]/15 bg-white px-3.5 shadow-xs transition-all focus-within:border-[#8b4114]">
                 <LockKeyhole className="h-4 w-4 shrink-0 text-[#76877e]" />
                 <input
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  className="w-full bg-transparent font-sans text-sm font-light outline-none"
-                  placeholder="Digite sua senha"
+                  required
+                  className="w-full bg-transparent font-sans text-xs sm:text-sm font-light text-[#8b4114] outline-none placeholder:text-[#76877e]/60"
+                  placeholder="Sua senha secreta"
                 />
-              </span>
+              </div>
             </label>
 
             {error && (
-              <p className="rounded-md bg-[#f0dfd4] px-3 py-2 font-sans text-sm font-light text-[#8b4114]">
+              <div className="rounded-xl border border-red-200 bg-red-50 p-3 font-sans text-xs font-light text-red-700">
                 {error}
-              </p>
+              </div>
             )}
 
-            <button disabled={isSubmitting} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#7d876d] px-5 font-sans text-base font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70">
-              {isSubmitting ? "Entrando..." : "Entrar"}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#8b4114] px-5 font-sans text-sm font-medium text-white shadow-md transition-all hover:bg-[#72340e] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span>{isSubmitting ? "Autenticando..." : "Entrar no Sistema"}</span>
               <LogIn className="h-4 w-4" />
             </button>
 
-            <p className="rounded-md bg-[#f8f1e9] px-3 py-2 text-center font-sans text-xs font-light leading-5 text-[#8b4114]/70">
-              Se você ainda não tem acesso, peça para o administrador principal criar seu usuário.
+            <p className="rounded-xl bg-[#f8f1e9]/70 px-3 py-2 text-center font-sans text-[11px] font-light text-[#8b4114]/70">
+              Caso tenha esquecido sua senha, solicite suporte ao administrador.
             </p>
           </form>
         </section>
@@ -205,3 +225,4 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
+

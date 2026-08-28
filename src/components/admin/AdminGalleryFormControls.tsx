@@ -67,7 +67,7 @@ export function ImageSlot({
   onClear: () => void;
 }) {
   return (
-    <div className="rounded-md border border-[#8b4114]/15 bg-white p-2">
+    <div className="flex min-h-0 flex-col rounded-md border border-[#8b4114]/15 bg-white p-2">
       <div className="flex items-center justify-between gap-3">
         <p className="font-sans text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#76877e]">{label}{required ? " *" : ""}</p>
         {value && (
@@ -76,7 +76,7 @@ export function ImageSlot({
           </button>
         )}
       </div>
-      <div className="mt-1.5 aspect-[4/3] overflow-hidden rounded-md border border-[#8b4114]/15 bg-[#fffaf5]">
+      <div className="mt-1.5 aspect-[4/3] min-h-0 overflow-hidden rounded-md border border-[#8b4114]/15 bg-[#fffaf5]">
         {value ? (
           <img src={value} alt={label} className="h-full w-full object-cover" />
         ) : (

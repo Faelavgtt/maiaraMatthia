@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/lib/cart";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -11,7 +11,6 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import AdminOrders from "./pages/AdminOrders";
-import AdminPhotos from "./pages/AdminPhotos";
 import AdminGalleryProducts from "./pages/AdminGalleryProducts";
 import AdminOtherProjects from "./pages/AdminOtherProjects";
 import AdminBucket from "./pages/AdminBucket";
@@ -38,7 +37,7 @@ const App = () => (
                 <Route path="pedidos" element={<AdminOrders />} />
                 <Route path="galeria" element={<AdminGalleryProducts />} />
                 <Route path="outros" element={<AdminOtherProjects />} />
-                <Route path="fotos" element={<AdminPhotos />} />
+                <Route path="fotos" element={<Navigate to="/admin" replace />} />
                 <Route path="bucket" element={<AdminBucket />} />
                 <Route path="usuarios" element={<AdminUsers />} />
               </Route>
