@@ -5,24 +5,70 @@ export const adminStatuses: Array<{ value: AdminOrderStatus; label: string }> = 
   { value: "awaiting_payment", label: "Aguardando pagamento" },
   { value: "received", label: "Recebido" },
   { value: "payment_confirmed", label: "Pagamento confirmado" },
-  { value: "in_production", label: "Em producao" },
-  { value: "awaiting_approval", label: "Aguardando aprovacao" },
+  { value: "in_production", label: "Em produção" },
+  { value: "awaiting_approval", label: "Aguardando aprovação" },
   { value: "finished", label: "Finalizado" },
 ];
 
+export const statusConfig: Record<
+  AdminOrderStatus,
+  {
+    label: string;
+    badgeClass: string;
+    dotClass: string;
+    pulseClass?: string;
+  }
+> = {
+  awaiting_payment: {
+    label: "Aguardando Pagamento",
+    badgeClass: "bg-amber-50/90 border border-amber-200 text-amber-900 shadow-2xs",
+    dotClass: "bg-amber-500",
+    pulseClass: "bg-amber-400",
+  },
+  received: {
+    label: "Recebido",
+    badgeClass: "bg-orange-50/90 border border-orange-200 text-orange-950 shadow-2xs",
+    dotClass: "bg-orange-500",
+    pulseClass: "bg-orange-400",
+  },
+  payment_confirmed: {
+    label: "Pagamento Confirmado",
+    badgeClass: "bg-emerald-50/90 border border-emerald-200 text-emerald-950 shadow-2xs",
+    dotClass: "bg-emerald-500",
+    pulseClass: "bg-emerald-400",
+  },
+  in_production: {
+    label: "Em Produção",
+    badgeClass: "bg-[#fbeee7] border border-[#ebd2c3] text-[#8b4114] shadow-2xs",
+    dotClass: "bg-[#8b4114]",
+    pulseClass: "bg-[#8b4114]",
+  },
+  awaiting_approval: {
+    label: "Aguardando Aprovação",
+    badgeClass: "bg-purple-50/90 border border-purple-200 text-purple-950 shadow-2xs",
+    dotClass: "bg-purple-500",
+    pulseClass: "bg-purple-400",
+  },
+  finished: {
+    label: "Finalizado",
+    badgeClass: "bg-slate-100 border border-slate-200 text-slate-800 shadow-2xs",
+    dotClass: "bg-slate-500",
+  },
+};
+
 export const statusStyles: Record<AdminOrderStatus, string> = {
-  awaiting_payment: "border-[#c68043]/35 bg-[#fff1cf] text-[#8b4114] shadow-[0_8px_18px_rgba(198,128,67,0.14)] [&>span]:bg-[#c68043]",
-  received: "border-[#ddb8a6] bg-[#f0dfd4] text-[#8b4114] shadow-[0_8px_18px_rgba(139,65,20,0.1)] [&>span]:bg-[#8b4114]",
-  payment_confirmed: "border-[#76877e]/30 bg-[#e4e7d9] text-[#4f5f50] shadow-[0_8px_18px_rgba(118,135,126,0.14)] [&>span]:bg-[#76877e]",
-  in_production: "border-[#d39a7e] bg-[#d39a7e] text-white shadow-[0_8px_18px_rgba(211,154,126,0.2)] [&>span]:bg-white",
-  awaiting_approval: "border-[#c68043] bg-[#c68043] text-white shadow-[0_8px_18px_rgba(198,128,67,0.22)] [&>span]:bg-white",
-  finished: "border-[#76877e] bg-[#76877e] text-white shadow-[0_8px_18px_rgba(118,135,126,0.2)] [&>span]:bg-white",
+  awaiting_payment: "border-amber-200 bg-amber-50 text-amber-900",
+  received: "border-orange-200 bg-orange-50 text-orange-900",
+  payment_confirmed: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  in_production: "border-[#ebd2c3] bg-[#fbeee7] text-[#8b4114]",
+  awaiting_approval: "border-purple-200 bg-purple-50 text-purple-900",
+  finished: "border-slate-200 bg-slate-50 text-slate-800",
 };
 
 export const metricConfig = [
   { key: "awaiting_payment", label: "Aguardando pagamento", icon: Clock3 },
-  { key: "in_production", label: "Em producao", icon: Palette },
-  { key: "awaiting_approval", label: "Aguardando aprovacao", icon: CheckCircle2 },
+  { key: "in_production", label: "Em produção", icon: Palette },
+  { key: "awaiting_approval", label: "Aguardando aprovação", icon: CheckCircle2 },
   { key: "finished", label: "Finalizados", icon: Truck },
 ] as const;
 
@@ -44,41 +90,5 @@ export const mockAdminOrders: AdminOrderRow[] = [
     status: "in_production",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  },
-  {
-    id: "mock-2",
-    code: "PED-00124",
-    customer_name: "Marina Alves",
-    customer_phone: "5565999990002",
-    customer_email: null,
-    product: "Quadro safari personalizado",
-    size: "A3",
-    colors: "Verde oliva e areia",
-    notes: null,
-    order_type: "galeria",
-    source: "cart",
-    files: [],
-    expires_at: new Date(Date.now() + 1000 * 60 * 60 * 40).toISOString(),
-    status: "payment_confirmed",
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    updated_at: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-  },
-  {
-    id: "mock-3",
-    code: "PED-00123",
-    customer_name: "Juliana Mattos",
-    customer_phone: "5565999990003",
-    customer_email: "juliana@email.com",
-    product: "Papelaria para aniversario",
-    size: null,
-    colors: "Mostarda e grafite",
-    notes: null,
-    order_type: "outros",
-    source: "manual",
-    files: [],
-    expires_at: null,
-    status: "awaiting_approval",
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    updated_at: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
   },
 ];

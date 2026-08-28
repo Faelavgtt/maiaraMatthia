@@ -1,17 +1,19 @@
-import { Edit3, Layers3, Trash2 } from "lucide-react";
+import { Copy, Edit3, Layers3, Trash2 } from "lucide-react";
 import type { GalleryProduct } from "@/lib/gallery-products";
 
 export function AdminGalleryProductsList({
   products,
   onEditProduct,
+  onDuplicateProduct,
   onRemoveProduct,
 }: {
   products: GalleryProduct[];
   onEditProduct: (product: GalleryProduct) => void;
+  onDuplicateProduct: (product: GalleryProduct) => void;
   onRemoveProduct: (id: string) => void;
 }) {
   return (
-    <div className="flex min-h-0 flex-col rounded-md border border-[#8b4114]/15 bg-white p-4 shadow-[0_18px_40px_rgba(93,51,29,0.06)]">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-[#8b4114]/15 bg-white p-4 shadow-[0_18px_40px_rgba(93,51,29,0.06)]">
       <div className="flex items-center justify-between gap-3 border-b border-[#8b4114]/10 pb-3">
         <div>
           <h2 className="font-sans text-lg font-light text-[#8b4114]">Produtos cadastrados</h2>
@@ -38,6 +40,9 @@ export function AdminGalleryProductsList({
             <div className="flex items-center gap-2 sm:flex-col">
               <button type="button" onClick={() => onEditProduct(product)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8b4114]/15 text-[#8b4114] transition-colors hover:bg-[#7d876d] hover:text-white" aria-label={`Editar ${product.title}`}>
                 <Edit3 className="h-4 w-4" />
+              </button>
+              <button type="button" onClick={() => onDuplicateProduct(product)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8b4114]/15 text-[#8b4114] transition-colors hover:bg-[#f0dfd4] hover:text-[#8b4114]" aria-label={`Duplicar ${product.title}`}>
+                <Copy className="h-4 w-4" />
               </button>
               <button type="button" onClick={() => onRemoveProduct(product.id)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8b4114]/15 text-[#8b4114] transition-colors hover:bg-[#8b4114] hover:text-white" aria-label={`Remover ${product.title}`}>
                 <Trash2 className="h-4 w-4" />
