@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, Home, Palette, Sparkles, Star } from "lucide-react";
+import { Heart, Home, MessageCircle, Palette, Sparkles, Star } from "lucide-react";
 
 const familyCards = [
   {
@@ -61,6 +61,13 @@ const familyFrames = [
   },
 ];
 
+const familyProductDetails = [
+  { label: "Moldura", value: "Madeira branca, preta ou crua com vidro" },
+  { label: "Tamanho", value: "30x30 cm" },
+  { label: "Peso", value: "Aproximadamente 1 kg" },
+  { label: "Valor", value: "R$ 450,00" },
+];
+
 export function FamilinhaSection() {
   return (
     <section id="familinha" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-14 pt-12 sm:px-8 md:pb-20 md:pt-16 xl:pb-28">
@@ -80,7 +87,7 @@ export function FamilinhaSection() {
         <Star className="absolute bottom-16 right-[6%] h-9 w-9 -rotate-12 fill-[#7d876d] text-[#7d876d]/80" />
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-8 md:gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center xl:gap-12">
+      <div className="mx-auto grid max-w-[94rem] gap-8 md:gap-10 lg:grid-cols-[minmax(26rem,0.8fr)_minmax(34rem,1.2fr)] lg:items-center xl:gap-12">
         
         {/* Coluna de Texto e Cards Informativos */}
         <motion.div
@@ -88,54 +95,65 @@ export function FamilinhaSection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
+          className="max-w-[35rem]"
         >
           <div className="inline-flex items-center gap-2 rounded-full bg-[#e8efda] px-3.5 py-1 font-sans text-xs font-semibold tracking-wider text-[#5f6850] shadow-sm">
             <Heart className="h-3.5 w-3.5 fill-[#7d876d]" aria-hidden="true" />
             A FAMILINHA
           </div>
 
-          <h2 className="mt-5 max-w-2xl font-sans text-[1.85rem] font-light leading-tight text-[#8b4114] sm:mt-7 sm:text-4xl md:text-[2.45rem] xl:mt-8 xl:text-[2.6rem]">
+          <h2 className="mt-5 max-w-2xl font-sans text-[1.85rem] font-light leading-tight text-[#8b4114] sm:mt-6 sm:text-4xl md:text-[2.35rem] xl:text-[2.5rem]">
             Uma arte feita à mão para apresentar quem mora no seu coração.
           </h2>
 
-          <p className="mt-3 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/80 sm:mt-4 sm:text-base sm:leading-relaxed">
+          <p className="mt-3 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/80 sm:text-base sm:leading-relaxed">
             A Familinha é uma ilustração autoral da Maiara com os membros da família em clima de desenho infantil: simples, afetuosa e cheia de pequenas pistas sobre cada pessoa.
           </p>
 
-          <div className="mt-5 grid gap-3 sm:mt-7 sm:grid-cols-3 sm:gap-4 xl:mt-8">
-            {familyCards.map((card, idx) => {
-              const Icon = card.icon;
-              return (
-                <motion.article
-                  key={card.title}
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: idx * 0.1 }}
-                  whileHover={{ y: -6, rotate: 0, scale: 1.02 }}
-                  className={`relative rounded-xl p-3.5 shadow-sm transition-all duration-300 sm:min-h-[10.5rem] sm:rounded-2xl sm:p-4 ${card.bgStyle} ${card.rotate}`}
-                >
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.badgeColor} text-[#8b4114] shadow-xs`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <h3 className="mt-3 font-sans text-sm font-medium text-[#8b4114]">
-                    {card.title}
-                  </h3>
-                  <p className="mt-1.5 font-sans text-[0.75rem] font-light leading-relaxed text-[#8b4114]/75">
-                    {card.text}
-                  </p>
-                </motion.article>
-              );
-            })}
+          <div className="mt-5 rounded-2xl border border-[#8b4114]/12 bg-white/78 p-4 shadow-[0_14px_34px_rgba(139,65,20,0.06)] backdrop-blur-sm sm:mt-6 sm:p-5">
+            <div className="border-b border-[#8b4114]/10 pb-3">
+              <p className="font-sans text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#76877e]">
+                Produto sob encomenda
+              </p>
+              <h3 className="mt-1 font-sans text-lg font-medium text-[#8b4114]">
+                Quadro Familinha
+              </h3>
+            </div>
+
+            <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              {familyProductDetails.map((detail) => (
+                <div key={detail.label} className="rounded-xl border border-[#8b4114]/10 bg-[#fff9f2] px-3.5 py-2.5">
+                  <span className="block font-sans text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-[#76877e]">
+                    {detail.label}
+                  </span>
+                  <span className="mt-1 block font-sans text-xs font-medium leading-5 text-[#8b4114]">
+                    {detail.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-4 font-sans text-sm font-light leading-6 text-[#8b4114]/78">
+              A criação é feita a partir das características combinadas com o cliente, como cor e corte de cabelo, composição da família e paleta de cores. A arte não é uma cópia literal de foto; as imagens de referência ajudam a representar detalhes importantes, como proporção, tom e tamanho do cabelo. O valor base contempla até 4 pessoas + 1 pet. Para composições maiores, há acréscimo de R$ 50,00 por pessoa ou pet adicional.
+            </p>
+
+            <a
+              href="#pedido"
+              className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#7d876d] px-5 font-sans text-sm font-medium text-white shadow-sm transition hover:bg-[#69725b] sm:w-auto"
+            >
+              Solicitar orçamento
+              <MessageCircle className="h-4 w-4" />
+            </a>
           </div>
+
         </motion.div>
 
         {/* Galeria de Fotos Assimétrica (Varal / Scrapbook) */}
-        <div className="relative pt-6 sm:pt-0">
+        <div className="relative justify-self-end pt-6 sm:pt-0 lg:w-full">
           
           
 
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          <div className="ml-auto grid max-w-[48rem] grid-cols-3 gap-3 sm:gap-4 lg:gap-5 xl:max-w-[52rem] xl:gap-7">
             {familyFrames.map((frame, index) => (
               <motion.figure
                 key={frame.src}
@@ -172,6 +190,33 @@ export function FamilinhaSection() {
                 </div>
               </motion.figure>
             ))}
+          </div>
+
+          <div className="ml-auto mt-7 grid max-w-[48rem] gap-3 sm:grid-cols-3 sm:gap-4 xl:max-w-[52rem] xl:gap-5">
+            {familyCards.map((card, idx) => {
+              const Icon = card.icon;
+              return (
+                <motion.article
+                  key={card.title}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
+                  whileHover={{ y: -6, rotate: 0, scale: 1.02 }}
+                  className={`relative rounded-xl p-3.5 shadow-sm transition-all duration-300 sm:min-h-[8.75rem] sm:rounded-2xl sm:p-4 ${card.bgStyle} ${card.rotate}`}
+                >
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${card.badgeColor} text-[#8b4114] shadow-xs`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <h3 className="mt-3 font-sans text-sm font-medium text-[#8b4114]">
+                    {card.title}
+                  </h3>
+                  <p className="mt-1.5 font-sans text-[0.72rem] font-light leading-5 text-[#8b4114]/75">
+                    {card.text}
+                  </p>
+                </motion.article>
+              );
+            })}
           </div>
         </div>
 
