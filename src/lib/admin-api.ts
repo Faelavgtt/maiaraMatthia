@@ -24,6 +24,11 @@ export type GalleryProductApiRow = {
   updatedAt: string;
 };
 
+export type OtherProjectApiRow = GalleryProductApiRow & {
+  number: string;
+  isActive: boolean;
+};
+
 export type GalleryProductInput = {
   name: string;
   title: string;
@@ -53,12 +58,20 @@ export type GalleryImageAsset = {
   contentType: string | null;
 };
 
+export type BucketFileAsset = GalleryImageAsset & {
+  group: "gallery" | "orders" | "other";
+};
+
 export type AdminOrderStatus =
+  | "awaiting_payment"
   | "received"
   | "payment_confirmed"
   | "in_production"
   | "awaiting_approval"
   | "finished";
+
+export type AdminOrderType = "familinha" | "maker" | "galeria" | "outros";
+export type AdminOrderSource = "manual" | "cart" | "maker";
 
 export type AdminOrderRow = {
   id: string;
@@ -66,12 +79,40 @@ export type AdminOrderRow = {
   product: string;
   size: string | null;
   colors: string | null;
+  notes: string | null;
   status: AdminOrderStatus;
+  order_type: AdminOrderType;
+  source: AdminOrderSource;
+  expires_at: string | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
   customer_phone: string;
   customer_email: string | null;
+  items?: AdminOrderItemRow[];
+  files: AdminOrderFileRow[];
+};
+
+export type AdminOrderItemRow = {
+  product_id: string | null;
+  title: string;
+  category: string | null;
+  order_type: AdminOrderType | null;
+  price: string | null;
+  dimensions: string | null;
+  quantity: number;
+  notes: string | null;
+  image_url: string | null;
+  sort_order: number;
+};
+
+export type AdminOrderFileRow = {
+  id: string;
+  kind: "original" | "preview" | "final";
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
 };
 
 export type AdminOrdersResponse = {
@@ -123,6 +164,23 @@ export async function updateAdminOrderStatus(code: string, status: AdminOrderSta
   }
 
   return response.json() as Promise<{ code: string; status: AdminOrderStatus }>;
+}
+
+export async function deleteAdminOrder(code: string) {
+  const response = await fetch(`${apiBaseUrl}/api/admin/orders/${code}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ code: string }>;
+}
+
+export function adminOrderFileUrl(fileId: string) {
+  return `${apiBaseUrl}/api/admin/files/${fileId}`;
 }
 
 export async function listAdminGalleryProducts() {
@@ -180,6 +238,61 @@ export async function deleteAdminGalleryProduct(id: string) {
   return response.json() as Promise<{ id: string }>;
 }
 
+export async function listAdminOtherProjects() {
+  const response = await fetch(`${apiBaseUrl}/api/admin/other-projects`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ products: OtherProjectApiRow[] }>;
+}
+
+export async function createAdminOtherProject(input: GalleryProductInput) {
+  const response = await fetch(`${apiBaseUrl}/api/admin/other-projects`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ product: OtherProjectApiRow }>;
+}
+
+export async function updateAdminOtherProject(id: string, input: GalleryProductInput) {
+  const response = await fetch(`${apiBaseUrl}/api/admin/other-projects/${id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ product: OtherProjectApiRow }>;
+}
+
+export async function deleteAdminOtherProject(id: string) {
+  const response = await fetch(`${apiBaseUrl}/api/admin/other-projects/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ id: string }>;
+}
+
 export async function uploadAdminGalleryImage(file: File) {
   const response = await fetch(`${apiBaseUrl}/api/admin/gallery-images`, {
     method: "PUT",
@@ -213,6 +326,40 @@ export async function listAdminGalleryImages(cursor?: string) {
 
 export async function deleteAdminGalleryImage(key: string) {
   const response = await fetch(`${apiBaseUrl}/api/admin/gallery-images/${encodeURIComponent(key)}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ key: string }>;
+}
+
+export async function listAdminBucketFiles(prefix = "", cursor?: string) {
+  const params = new URLSearchParams();
+  if (prefix) params.set("prefix", prefix);
+  if (cursor) params.set("cursor", cursor);
+  const query = params.toString() ? `?${params.toString()}` : "";
+
+  const response = await fetch(`${apiBaseUrl}/api/admin/bucket-files${query}`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ files: BucketFileAsset[]; cursor: string | null; truncated: boolean; prefix: string }>;
+}
+
+export function adminBucketFileUrl(key: string) {
+  return `${apiBaseUrl}/api/admin/bucket-files/${encodeURIComponent(key)}`;
+}
+
+export async function deleteAdminBucketFile(key: string) {
+  const response = await fetch(adminBucketFileUrl(key), {
     method: "DELETE",
     credentials: "include",
   });

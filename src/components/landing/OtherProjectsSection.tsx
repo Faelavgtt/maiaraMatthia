@@ -6,108 +6,27 @@ import {
   MessageCircle,
   Sparkles,
   ShoppingBag,
+  Star,
 } from "lucide-react";
 import { GalleryModal, type GalleryProject } from "./GalleryModal";
+import { listOtherProjects } from "@/lib/api";
 import { useCart } from "@/lib/cart";
+import {
+  otherProjectFromApi,
+  otherProjectsUpdatedEvent,
+  readOtherProjects,
+  writeOtherProjects,
+  type OtherProjectProduct,
+} from "@/lib/other-projects";
+import { buildWhatsappUrl } from "@/lib/whatsapp";
 
 const otherProjectsMessage = [
-  "Ola! Quero conversar sobre um projeto artistico com a Maiara Mattia.",
-  "Vi os outros trabalhos do atelie e tenho uma ideia fora da galeria principal.",
+  "Olá! Quero conversar sobre um projeto artístico com a Maiara Mattia.",
+  "Vi os outros trabalhos do ateliê e tenho uma ideia fora da galeria principal.",
   "Podemos falar sobre formato, prazo e possibilidades?",
 ].join("\n");
 
-const otherProjectsWhatsappUrl = `https://wa.me/?text=${encodeURIComponent(otherProjectsMessage)}`;
-
-const otherProjects: readonly GalleryProject[] = [
-  {
-    id: "outros-01",
-    number: "01",
-    title: "Banquinhos pintados",
-    category: "Pintura em objeto",
-    price: "R$ 180,00",
-    dimensions: "Banquinho ou peca sob consulta",
-    includedItems: [
-      "Pintura manual personalizada",
-      "Paleta criada para combinar com o ambiente",
-      "Acabamento protetor conforme o uso da peca",
-    ],
-    description: "Pecas utilitarias ganham cor, flor, nome ou um pequeno universo visual para entrar na casa com afeto.",
-    placeholder: "Banquinho pintado",
-    src: "/image/desenhos/desenhos.jpeg",
-    hoverSrc: "/image/desenhos/desenhos2.jpeg",
-    surface: "#ead4c6",
-    width: 300,
-    aspectRatio: "4 / 5",
-    offset: 0,
-    rotate: -1.4,
-  },
-  {
-    id: "outros-02",
-    number: "02",
-    title: "Objetos afetivos",
-    category: "Pecas sob medida",
-    price: "R$ 120,00",
-    dimensions: "Formato combinado por projeto",
-    includedItems: [
-      "Conversa inicial sobre tema e uso",
-      "Aplicacao de nomes, flores ou pequenos simbolos",
-      "Arte ajustada ao objeto escolhido",
-    ],
-    description: "Caixas, plaquinhas, lembrancas e objetos especiais que nao cabem em uma categoria pronta.",
-    placeholder: "Objeto afetivo",
-    src: "/image/desenhos/galeria.jpeg",
-    hoverSrc: "/image/desenhos/quadroFamilinha.jpeg",
-    surface: "#e4e7d9",
-    width: 300,
-    aspectRatio: "4 / 5",
-    offset: 0,
-    rotate: 0.9,
-  },
-  {
-    id: "outros-03",
-    number: "03",
-    title: "Pinturas soltas",
-    category: "Experimentacoes",
-    price: "R$ 90,00",
-    dimensions: "Tamanhos pequenos e medios",
-    includedItems: [
-      "Pintura ou estudo autoral",
-      "Opcao de moldura sob consulta",
-      "Peca unica ou pequena serie",
-    ],
-    description: "Estudos, flores, personagens e composicoes livres que nascem no atelie entre uma encomenda e outra.",
-    placeholder: "Pintura solta",
-    src: "/image/desenhos/desenhos2.jpeg",
-    hoverSrc: "/image/desenhos/galeria.jpeg",
-    surface: "#f0dfd4",
-    width: 300,
-    aspectRatio: "4 / 5",
-    offset: 0,
-    rotate: -0.6,
-  },
-  {
-    id: "outros-04",
-    number: "04",
-    title: "Pequenos presentes",
-    category: "Datas e memorias",
-    price: "R$ 75,00",
-    dimensions: "Peca pequena personalizada",
-    includedItems: [
-      "Personalizacao com nome, data ou frase curta",
-      "Formato definido conforme a ocasiao",
-      "Embalagem simples para presente",
-    ],
-    description: "Projetos menores para aniversarios, quarto infantil, mesa posta, festa ou um cantinho especial.",
-    placeholder: "Presente pequeno",
-    src: "/image/desenhos/quadroFamilinha3.jpeg",
-    hoverSrc: "/image/desenhos/quadroFamilinha2.jpeg",
-    surface: "#e9d7cb",
-    width: 300,
-    aspectRatio: "4 / 5",
-    offset: 0,
-    rotate: 1.2,
-  },
-];
+const otherProjectsWhatsappUrl = buildWhatsappUrl(otherProjectsMessage);
 
 export function OtherProjectsSection() {
   const wallRef = useRef<HTMLDivElement>(null);
@@ -118,6 +37,7 @@ export function OtherProjectsSection() {
   const pressedProjectIdRef = useRef<string | null>(null);
   const reduceMotion = useReducedMotion();
 
+  const [otherProjects, setOtherProjects] = useState<OtherProjectProduct[]>(() => readOtherProjects());
   const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
   const { addItem } = useCart();
   const carouselProjects = [...otherProjects, ...otherProjects, ...otherProjects];
@@ -203,16 +123,58 @@ export function OtherProjectsSection() {
     });
 
     return () => window.cancelAnimationFrame(frame);
+  }, [otherProjects.length]);
+
+  useEffect(() => {
+    const updateProducts = () => setOtherProjects(readOtherProjects());
+
+    window.addEventListener(otherProjectsUpdatedEvent, updateProducts);
+    window.addEventListener("storage", updateProducts);
+
+    return () => {
+      window.removeEventListener(otherProjectsUpdatedEvent, updateProducts);
+      window.removeEventListener("storage", updateProducts);
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    listOtherProjects()
+      .then((data) => {
+        if (!isMounted || data.products.length === 0) return;
+        const apiProducts = data.products.map(otherProjectFromApi);
+        setOtherProjects(apiProducts);
+        writeOtherProjects(apiProducts);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setOtherProjects(readOtherProjects());
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
-    <section id="outros-projetos" className="relative isolate overflow-hidden bg-[#f8f1e9] px-5 py-14 sm:px-8 md:py-16">
+    <section id="outros-projetos" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 py-12 sm:px-8 md:py-14 xl:py-16">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-        <div className="absolute inset-0 bg-[radial-gradient(#8b4114_0.75px,transparent_0.75px)] [background-size:26px_26px] opacity-[0.045]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#8b4114_0.75px,transparent_0.75px)] [background-size:24px_24px] opacity-[0.07]" />
+
+        <svg className="absolute left-0 top-10 w-full text-[#8b4114]/15" viewBox="0 0 1440 120" fill="none" preserveAspectRatio="none">
+          <path d="M0,30 C320,90 420,10 720,60 C1020,110 1120,20 1440,50" stroke="currentColor" strokeWidth="2" strokeDasharray="6 8" />
+        </svg>
+
+        <div className="absolute -left-16 top-1/4 h-72 w-72 rounded-full bg-[#f6c9b8]/30 blur-3xl" />
+        <div className="absolute right-[-10%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
+        <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-[#f5dfb8]/40 blur-3xl" />
+
+        <Star className="absolute bottom-16 right-[6%] h-9 w-9 -rotate-12 fill-[#7d876d] text-[#7d876d]/80" />
       </div>
 
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-6 border-b border-[#8b4114]/12 pb-7 lg:grid-cols-[0.9fr_0.7fr] lg:items-end">
+        <div className="grid gap-5 border-b border-[#8b4114]/12 pb-6 md:gap-6 md:pb-7 lg:grid-cols-[0.9fr_0.7fr] lg:items-end">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -222,13 +184,13 @@ export function OtherProjectsSection() {
           >
             <p className="inline-flex items-center gap-2 font-sans text-[0.68rem] font-normal uppercase tracking-[0.2em] text-[#7d876d]">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              Outros trabalhos do atelie
+              Outros trabalhos do ateliê
             </p>
-            <h2 className="mt-2 font-sans text-2xl font-extralight leading-tight text-[#8b4114] sm:text-3xl md:text-[2.25rem]">
-              Pecas artisticas menores, prontas para vender e presentear.
+            <h2 className="mt-2 font-sans text-[1.75rem] font-extralight leading-tight text-[#8b4114] sm:text-3xl md:text-[2.15rem] xl:text-[2.25rem]">
+              Peças artísticas menores, prontas para vender e presentear.
             </h2>
             <p className="mt-2 max-w-2xl font-sans text-sm font-light leading-6 text-[#8b4114]/72">
-              Banquinhos pintados, objetos, experimentos e pecas afetivas aparecem aqui como produtos especiais do atelie, com valores iniciais e possibilidade de personalizacao.
+              Banquinhos pintados, objetos, experimentos e peças afetivas aparecem aqui como produtos especiais do ateliê, com valores iniciais e possibilidade de personalização.
             </p>
           </motion.div>
 
@@ -236,11 +198,11 @@ export function OtherProjectsSection() {
             <p className="font-sans text-[0.68rem] font-normal uppercase tracking-[0.18em] text-[#76877e]">
               Ideia diferente?
             </p>
-            <h3 className="mt-1.5 font-sans text-xl font-extralight leading-tight text-[#8b4114]">
+            <h3 className="mt-1.5 font-sans text-lg font-extralight leading-tight text-[#8b4114] sm:text-xl">
               Nem todo trabalho precisa virar uma linha fixa.
             </h3>
             <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114]/72">
-              Se voce imaginou uma pintura em objeto, presente ou pequena intervencao, a conversa ajuda a descobrir se faz sentido.
+              Se você imaginou uma pintura em objeto, presente ou pequena intervenção, a conversa ajuda a descobrir se faz sentido.
             </p>
             <a
               href={otherProjectsWhatsappUrl}
@@ -254,16 +216,16 @@ export function OtherProjectsSection() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3 sm:mt-6">
           <p className="font-sans text-[0.7rem] font-medium uppercase tracking-wider text-[#8b4114]/60">
-            Arraste a parede para ver as pecas disponiveis
+            Arraste a parede para ver as peças disponíveis
           </p>
 
           <div className="flex items-center gap-2.5" aria-label="Controles do carrossel de outros projetos">
             <button
               type="button"
               onClick={() => scrollWall("previous")}
-              aria-label="Ver pecas anteriores"
+              aria-label="Ver peças anteriores"
               className="flex h-9 w-9 items-center justify-center rounded-full border border-[#8b4114]/15 bg-white text-[#8b4114] shadow-xs transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b4114]/40"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -271,7 +233,7 @@ export function OtherProjectsSection() {
             <button
               type="button"
               onClick={() => scrollWall("next")}
-              aria-label="Ver proximas pecas"
+              aria-label="Ver próximas peças"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8b4114] text-white shadow-xs transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b4114]/40"
             >
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -288,7 +250,7 @@ export function OtherProjectsSection() {
             onPointerCancel={stopWallDrag}
             onPointerLeave={stopWallDrag}
             onScroll={syncLoopPosition}
-            className="flex min-h-[31rem] cursor-grab select-none items-start gap-8 overflow-x-auto px-8 pb-8 pt-11 active:cursor-grabbing sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-h-[22rem] cursor-grab select-none items-start gap-5 overflow-x-auto px-5 pb-6 pt-8 active:cursor-grabbing sm:min-h-[25rem] sm:gap-7 sm:px-8 sm:pb-8 sm:pt-10 md:min-h-[28rem] md:gap-8 xl:min-h-[31rem] xl:px-8 xl:pb-8 xl:pt-11 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {carouselProjects.map((project, index) => (
               <StickerProductCard
@@ -304,7 +266,7 @@ export function OtherProjectsSection() {
 
         <div className="mt-5 flex flex-col gap-3 border-t border-[#8b4114]/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-sans text-[0.72rem] font-light uppercase tracking-[0.14em] text-[#8b4114]/50">
-            Pecas especiais com producao limitada e valores ajustados conforme tamanho, material e personalizacao.
+            Peças especiais com produção limitada. Para orçar, conte o tipo de peça, tamanho desejado e prazo aproximado.
           </p>
           <a
             href="#pedido"
@@ -324,6 +286,7 @@ export function OtherProjectsSection() {
             productId: project.id,
             title: project.title,
             category: project.category,
+            orderType: "outros",
             price: project.price,
             dimensions: project.dimensions,
             imageUrl: project.src,
@@ -367,7 +330,7 @@ function StickerProductCard({
         }
       }}
       style={{
-        width: `min(${project.width}px, 82vw)`,
+        width: `min(${Math.round(project.width * 0.94)}px, 78vw)`,
         marginTop: index % 2 === 0 ? 0 : 26,
         rotate: `${project.rotate}deg`,
       }}
@@ -411,7 +374,7 @@ function StickerProductCard({
 
         <div className="relative z-20 mt-3 grid grid-cols-[1fr_2.35rem] items-end gap-3">
           <div className="min-w-0">
-            <h3 className="font-sans text-lg font-medium leading-tight text-[#8b4114]">{project.title}</h3>
+            <h3 className="font-sans text-base font-medium leading-tight text-[#8b4114] sm:text-lg">{project.title}</h3>
             <p className="mt-1 line-clamp-2 font-sans text-[0.75rem] font-light leading-4 text-[#8b4114]/72">
               {project.description}
             </p>

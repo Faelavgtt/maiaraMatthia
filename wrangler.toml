@@ -3,11 +3,14 @@ main = "worker/src/index.ts"
 compatibility_date = "2026-07-16"
 
 [vars]
-APP_ORIGIN = "http://localhost:8080"
+APP_ORIGIN = "https://maiaramatthia.rafavergottii.workers.dev"
 ADMIN_OWNER_USERNAME = "admin"
 ADMIN_OWNER_EMAIL = ""
 ADMIN_OWNER_PASSWORD = ""
-WHATSAPP_NUMBER = ""
+WHATSAPP_NUMBER = "5567991939487"
+
+[triggers]
+crons = ["0 * * * *"]
 
 [assets]
 directory = "./dist/"

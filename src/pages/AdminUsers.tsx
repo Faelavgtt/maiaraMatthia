@@ -29,7 +29,7 @@ const AdminUsers = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (error) => {
-      setMessage(error instanceof Error ? error.message : "Nao foi possivel cadastrar o usuario.");
+      setMessage(error instanceof Error ? error.message : "Não foi possível cadastrar o usuário.");
     },
   });
 

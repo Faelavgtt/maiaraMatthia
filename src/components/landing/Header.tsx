@@ -64,7 +64,7 @@ export function Header() {
       }`}
       style={{ backgroundColor: headerBackgroundColor }}
     >
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5">
+      <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-5">
         <a
           href="#inicio"
           aria-label="Maiara Mattia - início"
@@ -73,7 +73,7 @@ export function Header() {
         >
           <span
             aria-hidden="true"
-            className="h-12 w-[5rem] bg-current"
+            className="h-10 w-[4.35rem] bg-current sm:h-12 sm:w-[5rem]"
             style={{
               WebkitMaskImage: 'url("/logoMaiara.svg")',
               maskImage: 'url("/logoMaiara.svg")',
@@ -91,14 +91,14 @@ export function Header() {
           style={{ color: navTextColor }}
         >
           <a href="#portfolio">Projetos</a>
-          <a href="#outros-projetos">Atelie</a>
+          <a href="#outros-projetos">Ateliê</a>
           <a href="#maker">Maker</a>
           <a href="#feedbacks">Feedbacks</a>
           <a href="#pedido">Pedido</a>
 
           
         </div>
-        <a href="#pedido" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#7d876d] px-4 font-sans text-sm font-medium text-white shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
+        <a href="#pedido" className="inline-flex h-9 items-center gap-2 rounded-full bg-[#7d876d] px-3.5 font-sans text-xs font-medium text-white shadow-[0_10px_24px_rgba(0,0,0,0.12)] sm:h-10 sm:px-4 sm:text-sm">
           <MessageCircle className="h-4 w-4" />
           Encomendar
         </a>

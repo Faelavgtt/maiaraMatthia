@@ -38,13 +38,13 @@ type AdminIdentity = {
   role: "owner" | "admin";
 };
 
-const allowedContentTypes = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+const allowedOrderFileTypes = new Set(["image/jpeg", "image/png", "application/pdf"]);
 const allowedGalleryImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const maxUploadBytes = 10 * 1024 * 1024;
+const maxOrderFileBytes = 50 * 1024 * 1024;
 const maxGalleryImageBytes = 8 * 1024 * 1024;
 const adminSessionCookieName = "maiara_admin_session";
 const adminSessionDurationMs = 1000 * 60 * 60 * 24 * 7;
-const passwordHashIterations = 120000;
+const passwordHashIterations = 100000;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -56,7 +56,7 @@ export default {
 
     try {
       if (url.pathname === "/health") {
-        return json({ ok: true, storage: "disabled" }, 200, env);
+        return json({ ok: true, storage: env.DB ? "d1" : "disabled" }, 200, env);
       }
 
       if (request.method === "POST" && url.pathname === "/api/orders") {
@@ -75,6 +75,10 @@ export default {
         return listGalleryProducts(env);
       }
 
+      if (request.method === "GET" && url.pathname === "/api/other-projects") {
+        return listOtherProjects(env);
+      }
+
       const galleryImageMatch = url.pathname.match(/^\/api\/gallery-images\/(.+)$/);
       if (request.method === "GET" && galleryImageMatch) {
         return getGalleryImage(env, galleryImageMatch[1]);
@@ -82,12 +86,12 @@ export default {
 
       const orderMatch = url.pathname.match(/^\/api\/orders\/([^/]+)$/);
       if (request.method === "GET" && orderMatch) {
-        return json({ error: "Order storage is temporarily disabled" }, 503, env);
+        return getOrder(orderMatch[1], url.searchParams.get("token"), env);
       }
 
       const uploadMatch = url.pathname.match(/^\/api\/orders\/([^/]+)\/files\/([^/]+)$/);
       if (request.method === "PUT" && uploadMatch) {
-        return uploadTemporaryOrderFile(request, env, uploadMatch[1], uploadMatch[2], url.searchParams.get("token"));
+        return uploadOrderFile(request, env, uploadMatch[1], uploadMatch[2], url.searchParams.get("token"));
       }
 
       if (request.method === "GET" && url.pathname === "/api/admin/orders") {
@@ -141,6 +145,31 @@ export default {
         return deleteGalleryProduct(env, adminGalleryProductMatch[1]);
       }
 
+      if (request.method === "GET" && url.pathname === "/api/admin/other-projects") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return listOtherProjects(env);
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/admin/other-projects") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return createOtherProject(request, env);
+      }
+
+      const adminOtherProjectMatch = url.pathname.match(/^\/api\/admin\/other-projects\/([^/]+)$/);
+      if (adminOtherProjectMatch && request.method === "PATCH") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return updateOtherProject(request, env, adminOtherProjectMatch[1]);
+      }
+
+      if (adminOtherProjectMatch && request.method === "DELETE") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return deleteOtherProject(env, adminOtherProjectMatch[1]);
+      }
+
       if (request.method === "PUT" && url.pathname === "/api/admin/gallery-images") {
         const admin = await requireAdmin(request, env);
         if (admin instanceof Response) return admin;
@@ -153,11 +182,30 @@ export default {
         return listGalleryImages(env, url.searchParams.get("cursor"));
       }
 
+      if (request.method === "GET" && url.pathname === "/api/admin/bucket-files") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return listBucketFiles(env, url.searchParams.get("prefix"), url.searchParams.get("cursor"));
+      }
+
       const adminGalleryImageMatch = url.pathname.match(/^\/api\/admin\/gallery-images\/(.+)$/);
       if (adminGalleryImageMatch && request.method === "DELETE") {
         const admin = await requireAdmin(request, env);
         if (admin instanceof Response) return admin;
         return deleteGalleryImage(env, adminGalleryImageMatch[1]);
+      }
+
+      const adminBucketFileMatch = url.pathname.match(/^\/api\/admin\/bucket-files\/(.+)$/);
+      if (adminBucketFileMatch && request.method === "GET") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return getBucketFile(env, adminBucketFileMatch[1]);
+      }
+
+      if (adminBucketFileMatch && request.method === "DELETE") {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return deleteBucketFile(env, adminBucketFileMatch[1]);
       }
 
       const adminStatusMatch = url.pathname.match(/^\/api\/admin\/orders\/([^/]+)\/status$/);
@@ -167,11 +215,18 @@ export default {
         return updateOrderStatus(request, env, adminStatusMatch[1]);
       }
 
+      const adminOrderMatch = url.pathname.match(/^\/api\/admin\/orders\/([^/]+)$/);
+      if (request.method === "DELETE" && adminOrderMatch) {
+        const admin = await requireAdmin(request, env);
+        if (admin instanceof Response) return admin;
+        return deleteAdminOrder(env, adminOrderMatch[1]);
+      }
+
       const adminFileMatch = url.pathname.match(/^\/api\/admin\/files\/([^/]+)$/);
       if (request.method === "GET" && adminFileMatch) {
         const admin = await requireAdmin(request, env);
         if (admin instanceof Response) return admin;
-        return json({ error: "File lookup is temporarily disabled" }, 503, env);
+        return getAdminFile(env, adminFileMatch[1]);
       }
 
       return json({ error: "Not found" }, 404, env);
@@ -179,7 +234,16 @@ export default {
       return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 500, env);
     }
   },
+
+  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext): Promise<void> {
+    await deleteExpiredUnpaidOrders(env);
+  },
 };
+
+const orderStatuses = ["awaiting_payment", "received", "payment_confirmed", "in_production", "awaiting_approval", "finished"] as const;
+const orderTypes = ["familinha", "maker", "galeria", "outros"] as const;
+const automaticOrderSources = ["cart", "maker"] as const;
+const pendingOrderDurationMs = 1000 * 60 * 60 * 48;
 
 async function createOrder(request: Request, env: Env) {
   const db = requireDb(env);
@@ -194,7 +258,11 @@ async function createOrder(request: Request, env: Env) {
   const size = optionalString(body.size);
   const items = normalizeOrderItems(body.items, body);
   const product = summarizeOrderItems(items);
-  const now = new Date().toISOString();
+  const orderType = requireEnum(body.orderType ?? inferOrderType(items), "orderType", orderTypes);
+  const source = requireEnum(body.source ?? "cart", "source", automaticOrderSources);
+  const nowDate = new Date();
+  const now = nowDate.toISOString();
+  const expiresAt = new Date(nowDate.getTime() + pendingOrderDurationMs).toISOString();
   const customerId = crypto.randomUUID();
   const orderId = crypto.randomUUID();
   const code = orderCode();
@@ -217,18 +285,24 @@ async function createOrder(request: Request, env: Env) {
   }
 
   await db.prepare(
-    `INSERT INTO orders (id, code, customer_id, token, product, size, colors, notes, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO orders (id, code, customer_id, token, product, size, colors, notes, status, order_type, source, expires_at, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
-    .bind(orderId, code, finalCustomerId, token, product, size, colors, notes, "received", now, now)
+    .bind(orderId, code, finalCustomerId, token, product, size, colors, notes, "awaiting_payment", orderType, source, expiresAt, now, now)
+    .run();
+
+  await db.prepare(
+    "INSERT INTO status_events (id, order_id, status, note, created_at) VALUES (?, ?, ?, ?, ?)",
+  )
+    .bind(crypto.randomUUID(), orderId, "awaiting_payment", "Pedido criado pelo site, aguardando pagamento", now)
     .run();
 
   for (let index = 0; index < items.length; index += 1) {
     const item = items[index];
     await db.prepare(
       `INSERT INTO order_items
-        (id, order_id, product_id, title, category, price, dimensions, quantity, notes, image_url, sort_order, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, order_id, product_id, title, category, order_type, price, dimensions, quantity, notes, image_url, sort_order, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
       .bind(
         crypto.randomUUID(),
@@ -236,6 +310,7 @@ async function createOrder(request: Request, env: Env) {
         item.productId,
         item.title,
         item.category,
+        item.orderType,
         item.price,
         item.dimensions,
         item.quantity,
@@ -247,7 +322,20 @@ async function createOrder(request: Request, env: Env) {
       .run();
   }
 
-  const whatsappUrl = buildWhatsAppUrl(env.WHATSAPP_NUMBER, code, product);
+  const whatsappUrl = buildWhatsAppUrl(env.WHATSAPP_NUMBER, {
+    code,
+    customerName,
+    phone,
+    email,
+    product,
+    orderType,
+    source,
+    size,
+    colors,
+    notes,
+    items,
+    expiresAt,
+  });
 
   return json({
     code,
@@ -259,12 +347,79 @@ async function createOrder(request: Request, env: Env) {
   }, 201, env);
 }
 
+async function getOrder(code: string, token: string | null, env: Env) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+  if (!token) return json({ error: "Token is required" }, 401, env);
+
+  const order = await db.prepare(
+    `SELECT orders.id, orders.code, orders.token, orders.product, orders.size, orders.colors,
+            orders.notes, orders.status, orders.order_type, orders.source, orders.expires_at, orders.created_at, orders.updated_at,
+            customers.name AS customer_name, customers.phone AS customer_phone, customers.email AS customer_email
+     FROM orders
+     INNER JOIN customers ON customers.id = orders.customer_id
+     WHERE orders.code = ?
+     LIMIT 1`,
+  )
+    .bind(code)
+    .first<OrderRow>();
+
+  if (!order || order.token !== token) {
+    return json({ error: "Order not found" }, 404, env);
+  }
+
+  const { results: items } = await db.prepare(
+    `SELECT product_id, title, category, order_type, price, dimensions, quantity, notes, image_url, sort_order
+     FROM order_items
+     WHERE order_id = ?
+     ORDER BY sort_order ASC`,
+  )
+    .bind(order.id)
+    .all<OrderItemRow>();
+
+  const { results: events } = await db.prepare(
+    `SELECT status, note, created_at
+     FROM status_events
+     WHERE order_id = ?
+     ORDER BY created_at ASC`,
+  )
+    .bind(order.id)
+    .all<StatusEventRow>();
+
+  const { results: files } = await db.prepare(
+    `SELECT id, kind, file_name, content_type, size_bytes, created_at
+     FROM order_files
+     WHERE order_id = ?
+     ORDER BY created_at ASC`,
+  )
+    .bind(order.id)
+    .all<OrderFileRow>();
+
+  return json({
+    code: order.code,
+    product: order.product,
+    size: order.size,
+    colors: order.colors,
+    notes: order.notes,
+    status: order.status,
+    orderType: order.order_type,
+    source: order.source,
+    expiresAt: order.expires_at,
+    customerName: order.customer_name,
+    createdAt: order.created_at,
+    updatedAt: order.updated_at,
+    items,
+    events,
+    files,
+  }, 200, env);
+}
+
 async function listAdminOrders(env: Env) {
   const db = requireDb(env);
   if (db instanceof Response) return db;
 
   const { results } = await db.prepare(
-    `SELECT orders.id, orders.code, orders.product, orders.size, orders.colors, orders.status, orders.created_at, orders.updated_at,
+    `SELECT orders.id, orders.code, orders.product, orders.size, orders.colors, orders.notes, orders.status, orders.order_type, orders.source, orders.expires_at, orders.created_at, orders.updated_at,
             customers.name AS customer_name, customers.phone AS customer_phone, customers.email AS customer_email
      FROM orders
      INNER JOIN customers ON customers.id = orders.customer_id
@@ -272,7 +427,30 @@ async function listAdminOrders(env: Env) {
      LIMIT 100`,
   ).all<AdminOrderRow>();
 
-  return json({ orders: results }, 200, env);
+  const orders = [];
+  for (const order of results) {
+    const { results: items } = await db.prepare(
+      `SELECT product_id, title, category, order_type, price, dimensions, quantity, notes, image_url, sort_order
+       FROM order_items
+       WHERE order_id = ?
+       ORDER BY sort_order ASC`,
+    )
+      .bind(order.id)
+      .all<AdminOrderItemRow>();
+
+    const { results: files } = await db.prepare(
+      `SELECT id, kind, file_name, content_type, size_bytes, created_at
+       FROM order_files
+       WHERE order_id = ?
+       ORDER BY created_at ASC`,
+    )
+      .bind(order.id)
+      .all<AdminOrderFileRow>();
+
+    orders.push({ ...order, items, files });
+  }
+
+  return json({ orders }, 200, env);
 }
 
 async function updateOrderStatus(request: Request, env: Env, code: string) {
@@ -280,14 +458,50 @@ async function updateOrderStatus(request: Request, env: Env, code: string) {
   if (db instanceof Response) return db;
 
   const body = await readJson(request);
-  const status = requireEnum(body.status, "status", ["received", "payment_confirmed", "in_production", "awaiting_approval", "finished"]);
+  const status = requireEnum(body.status, "status", orderStatuses);
+  const note = optionalString(body.note);
   const now = new Date().toISOString();
+  const order = await db.prepare("SELECT id FROM orders WHERE code = ? LIMIT 1").bind(code).first<{ id: string }>();
+
+  if (!order) {
+    return json({ error: "Order not found" }, 404, env);
+  }
 
   await db.prepare("UPDATE orders SET status = ?, updated_at = ? WHERE code = ?")
     .bind(status, now, code)
     .run();
 
+  await db.prepare(
+    "INSERT INTO status_events (id, order_id, status, note, created_at) VALUES (?, ?, ?, ?, ?)",
+  )
+    .bind(crypto.randomUUID(), order.id, status, note, now)
+    .run();
+
   return json({ code, status }, 200, env);
+}
+
+async function deleteAdminOrder(env: Env, code: string) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+
+  const order = await db.prepare("SELECT id FROM orders WHERE code = ? LIMIT 1").bind(code).first<{ id: string }>();
+
+  if (!order) {
+    return json({ error: "Order not found" }, 404, env);
+  }
+
+  const { results: files } = await db.prepare("SELECT object_key FROM order_files WHERE order_id = ?")
+    .bind(order.id)
+    .all<{ object_key: string }>();
+
+  const objectKeys = files.map((file) => file.object_key).filter(Boolean);
+  if (objectKeys.length > 0) {
+    await env.FILES.delete(objectKeys);
+  }
+
+  await db.prepare("DELETE FROM orders WHERE id = ?").bind(order.id).run();
+
+  return json({ code }, 200, env);
 }
 
 async function loginAdmin(request: Request, env: Env) {
@@ -407,16 +621,26 @@ async function createAdminUser(request: Request, env: Env, admin: AdminIdentity)
   return json({ user: user ? toAdminUserResponse(user) : null }, 201, env);
 }
 
-async function uploadTemporaryOrderFile(request: Request, env: Env, code: string, kind: string, token: string | null) {
+async function uploadOrderFile(request: Request, env: Env, code: string, kind: string, token: string | null) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
   if (!token) return json({ error: "Token is required" }, 401, env);
   if (!["original", "preview", "final"].includes(kind)) return json({ error: "Invalid file kind" }, 400, env);
+
+  const order = await db.prepare("SELECT id, token FROM orders WHERE code = ? LIMIT 1")
+    .bind(code)
+    .first<{ id: string; token: string }>();
+
+  if (!order || order.token !== token) {
+    return json({ error: "Order not found" }, 404, env);
+  }
 
   const contentType = request.headers.get("content-type") ?? "";
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   const fileName = request.headers.get("x-file-name") ?? `${kind}`;
 
-  if (!allowedContentTypes.has(contentType)) return json({ error: "Unsupported file type" }, 415, env);
-  if (!contentLength || contentLength > maxUploadBytes) return json({ error: "File must be up to 10 MB" }, 413, env);
+  if (!allowedOrderFileTypes.has(contentType)) return json({ error: "Envie um arquivo PNG, JPG ou PDF" }, 415, env);
+  if (!contentLength || contentLength > maxOrderFileBytes) return json({ error: "O arquivo precisa ter ate 50 MB" }, 413, env);
   if (!request.body) return json({ error: "Missing file body" }, 400, env);
 
   const fileId = crypto.randomUUID();
@@ -424,7 +648,38 @@ async function uploadTemporaryOrderFile(request: Request, env: Env, code: string
 
   await env.FILES.put(objectKey, request.body, { httpMetadata: { contentType } });
 
-  return json({ fileId, objectKey, storage: "r2-only" }, 201, env);
+  await db.prepare(
+    `INSERT INTO order_files
+      (id, order_id, kind, object_key, file_name, content_type, size_bytes, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(fileId, order.id, kind, objectKey, fileName, contentType, contentLength, new Date().toISOString())
+    .run();
+
+  return json({ fileId, objectKey, storage: "d1+r2" }, 201, env);
+}
+
+async function getAdminFile(env: Env, fileId: string) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+
+  const file = await db.prepare(
+    "SELECT object_key, file_name, content_type FROM order_files WHERE id = ? LIMIT 1",
+  )
+    .bind(fileId)
+    .first<{ object_key: string; file_name: string; content_type: string }>();
+
+  if (!file) return json({ error: "File not found" }, 404, env);
+
+  const object = await env.FILES.get(file.object_key);
+  if (!object) return json({ error: "File object not found" }, 404, env);
+
+  return new Response(object.body, {
+    headers: {
+      "content-type": object.httpMetadata?.contentType ?? file.content_type,
+      "content-disposition": `attachment; filename="${file.file_name.replaceAll('"', "")}"`,
+    },
+  });
 }
 
 async function listGalleryProducts(env: Env) {
@@ -433,7 +688,7 @@ async function listGalleryProducts(env: Env) {
 
   const { results } = await db.prepare(
     `SELECT id, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
-            static_image, hover_image, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at
+            static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at
      FROM gallery_products
      ORDER BY sort_order ASC, created_at ASC`,
   ).all<GalleryProductRow>();
@@ -456,8 +711,8 @@ async function createGalleryProduct(request: Request, env: Env) {
   const includedItems = requireStringArray(body.includedItems, "includedItems");
   const description = requireString(body.description, "description");
   const placeholder = optionalString(body.placeholder) ?? title;
-  const staticImage = requireString(body.staticImage, "staticImage");
-  const hoverImage = optionalString(body.hoverImage);
+  const staticImageKey = requireObjectKey(body.staticImage, "staticImage");
+  const hoverImageKey = optionalObjectKey(body.hoverImage);
   const surface = optionalString(body.surface) ?? "#ead4c6";
   const frameFormat = requireEnum(body.frameFormat, "frameFormat", ["landscape", "portrait", "square", "wide", "classic"]);
   const width = requireNumber(body.width, "width");
@@ -470,7 +725,7 @@ async function createGalleryProduct(request: Request, env: Env) {
   await db.prepare(
     `INSERT INTO gallery_products
       (id, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
-       static_image, hover_image, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at)
+       static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
@@ -484,8 +739,8 @@ async function createGalleryProduct(request: Request, env: Env) {
       JSON.stringify(includedItems),
       description,
       placeholder,
-      staticImage,
-      hoverImage,
+      staticImageKey,
+      hoverImageKey,
       surface,
       frameFormat,
       width,
@@ -500,7 +755,7 @@ async function createGalleryProduct(request: Request, env: Env) {
 
   const row = await db.prepare(
     `SELECT id, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
-            static_image, hover_image, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at
+            static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at
      FROM gallery_products
      WHERE id = ?`,
   )
@@ -524,8 +779,8 @@ async function updateGalleryProduct(request: Request, env: Env, id: string) {
   const includedItems = requireStringArray(body.includedItems, "includedItems");
   const description = requireString(body.description, "description");
   const placeholder = optionalString(body.placeholder) ?? title;
-  const staticImage = requireString(body.staticImage, "staticImage");
-  const hoverImage = optionalString(body.hoverImage);
+  const staticImageKey = requireObjectKey(body.staticImage, "staticImage");
+  const hoverImageKey = optionalObjectKey(body.hoverImage);
   const surface = optionalString(body.surface) ?? "#ead4c6";
   const frameFormat = requireEnum(body.frameFormat, "frameFormat", ["landscape", "portrait", "square", "wide", "classic"]);
   const width = requireNumber(body.width, "width");
@@ -538,7 +793,7 @@ async function updateGalleryProduct(request: Request, env: Env, id: string) {
   await db.prepare(
     `UPDATE gallery_products
      SET name = ?, title = ?, category = ?, price = ?, original_price = ?, dimensions = ?,
-         included_items = ?, description = ?, placeholder = ?, static_image = ?, hover_image = ?,
+         included_items = ?, description = ?, placeholder = ?, static_image_key = ?, hover_image_key = ?,
          surface = ?, frame_format = ?, width = ?, aspect_ratio = ?, offset = ?, rotate = ?,
          sort_order = ?, updated_at = ?
      WHERE id = ?`,
@@ -553,8 +808,8 @@ async function updateGalleryProduct(request: Request, env: Env, id: string) {
       JSON.stringify(includedItems),
       description,
       placeholder,
-      staticImage,
-      hoverImage,
+      staticImageKey,
+      hoverImageKey,
       surface,
       frameFormat,
       width,
@@ -569,7 +824,7 @@ async function updateGalleryProduct(request: Request, env: Env, id: string) {
 
   const row = await db.prepare(
     `SELECT id, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
-            static_image, hover_image, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at
+            static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, created_at, updated_at
      FROM gallery_products
      WHERE id = ?`,
   )
@@ -585,6 +840,174 @@ async function deleteGalleryProduct(env: Env, id: string) {
   if (db instanceof Response) return db;
 
   await db.prepare("DELETE FROM gallery_products WHERE id = ?").bind(id).run();
+  return json({ id }, 200, env);
+}
+
+async function listOtherProjects(env: Env) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+
+  const { results } = await db.prepare(
+    `SELECT id, number, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
+            static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, is_active, created_at, updated_at
+     FROM other_projects
+     WHERE is_active = 1
+     ORDER BY sort_order ASC, created_at ASC`,
+  ).all<OtherProjectRow>();
+
+  return json({ products: results.map(toOtherProjectResponse) }, 200, env);
+}
+
+async function createOtherProject(request: Request, env: Env) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+
+  const body = await readJson(request);
+  const id = crypto.randomUUID();
+  const number = optionalString(body.number) ?? "00";
+  const name = requireString(body.name, "name");
+  const title = requireString(body.title, "title");
+  const category = requireString(body.category, "category");
+  const price = requireString(body.price, "price");
+  const originalPrice = optionalString(body.originalPrice);
+  const dimensions = requireString(body.dimensions, "dimensions");
+  const includedItems = requireStringArray(body.includedItems, "includedItems");
+  const description = requireString(body.description, "description");
+  const placeholder = optionalString(body.placeholder) ?? title;
+  const staticImageKey = requireObjectKey(body.staticImage, "staticImage");
+  const hoverImageKey = optionalObjectKey(body.hoverImage);
+  const surface = optionalString(body.surface) ?? "#ead4c6";
+  const frameFormat = requireEnum(body.frameFormat, "frameFormat", ["landscape", "portrait", "square", "wide", "classic"]);
+  const width = requireNumber(body.width, "width");
+  const aspectRatio = requireString(body.aspectRatio, "aspectRatio");
+  const offset = requireNumber(body.offset, "offset");
+  const rotate = requireNumber(body.rotate, "rotate");
+  const sortOrder = Number(body.sortOrder ?? Date.now());
+  const now = new Date().toISOString();
+
+  await db.prepare(
+    `INSERT INTO other_projects
+      (id, number, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
+       static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+  )
+    .bind(
+      id,
+      number,
+      name,
+      title,
+      category,
+      price,
+      originalPrice,
+      dimensions,
+      JSON.stringify(includedItems),
+      description,
+      placeholder,
+      staticImageKey,
+      hoverImageKey,
+      surface,
+      frameFormat,
+      width,
+      aspectRatio,
+      offset,
+      rotate,
+      sortOrder,
+      now,
+      now,
+    )
+    .run();
+
+  const row = await db.prepare(
+    `SELECT id, number, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
+            static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, is_active, created_at, updated_at
+     FROM other_projects
+     WHERE id = ?`,
+  )
+    .bind(id)
+    .first<OtherProjectRow>();
+
+  return json({ product: row ? toOtherProjectResponse(row) : null }, 201, env);
+}
+
+async function updateOtherProject(request: Request, env: Env, id: string) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+
+  const body = await readJson(request);
+  const number = optionalString(body.number) ?? "00";
+  const name = requireString(body.name, "name");
+  const title = requireString(body.title, "title");
+  const category = requireString(body.category, "category");
+  const price = requireString(body.price, "price");
+  const originalPrice = optionalString(body.originalPrice);
+  const dimensions = requireString(body.dimensions, "dimensions");
+  const includedItems = requireStringArray(body.includedItems, "includedItems");
+  const description = requireString(body.description, "description");
+  const placeholder = optionalString(body.placeholder) ?? title;
+  const staticImageKey = requireObjectKey(body.staticImage, "staticImage");
+  const hoverImageKey = optionalObjectKey(body.hoverImage);
+  const surface = optionalString(body.surface) ?? "#ead4c6";
+  const frameFormat = requireEnum(body.frameFormat, "frameFormat", ["landscape", "portrait", "square", "wide", "classic"]);
+  const width = requireNumber(body.width, "width");
+  const aspectRatio = requireString(body.aspectRatio, "aspectRatio");
+  const offset = requireNumber(body.offset, "offset");
+  const rotate = requireNumber(body.rotate, "rotate");
+  const sortOrder = Number(body.sortOrder ?? Date.now());
+  const now = new Date().toISOString();
+
+  await db.prepare(
+    `UPDATE other_projects
+     SET number = ?, name = ?, title = ?, category = ?, price = ?, original_price = ?, dimensions = ?,
+         included_items = ?, description = ?, placeholder = ?, static_image_key = ?, hover_image_key = ?,
+         surface = ?, frame_format = ?, width = ?, aspect_ratio = ?, offset = ?, rotate = ?,
+         sort_order = ?, is_active = 1, updated_at = ?
+     WHERE id = ?`,
+  )
+    .bind(
+      number,
+      name,
+      title,
+      category,
+      price,
+      originalPrice,
+      dimensions,
+      JSON.stringify(includedItems),
+      description,
+      placeholder,
+      staticImageKey,
+      hoverImageKey,
+      surface,
+      frameFormat,
+      width,
+      aspectRatio,
+      offset,
+      rotate,
+      sortOrder,
+      now,
+      id,
+    )
+    .run();
+
+  const row = await db.prepare(
+    `SELECT id, number, name, title, category, price, original_price, dimensions, included_items, description, placeholder,
+            static_image_key, hover_image_key, surface, frame_format, width, aspect_ratio, offset, rotate, sort_order, is_active, created_at, updated_at
+     FROM other_projects
+     WHERE id = ?`,
+  )
+    .bind(id)
+    .first<OtherProjectRow>();
+
+  if (!row) return json({ error: "Other project not found" }, 404, env);
+  return json({ product: toOtherProjectResponse(row) }, 200, env);
+}
+
+async function deleteOtherProject(env: Env, id: string) {
+  const db = requireDb(env);
+  if (db instanceof Response) return db;
+
+  await db.prepare("UPDATE other_projects SET is_active = 0, updated_at = ? WHERE id = ?")
+    .bind(new Date().toISOString(), id)
+    .run();
   return json({ id }, 200, env);
 }
 
@@ -621,16 +1044,48 @@ async function listGalleryImages(env: Env, cursor: string | null) {
       url: `/api/gallery-images/${object.key}`,
       size: object.size,
       uploaded: object.uploaded.toISOString(),
-      contentType: object.httpMetadata?.contentType ?? null,
+      contentType: object.httpMetadata?.contentType ?? inferContentTypeFromKey(object.key),
     })),
     cursor: listed.cursor ?? null,
     truncated: listed.truncated,
   }, 200, env);
 }
 
+async function listBucketFiles(env: Env, prefix: string | null, cursor: string | null) {
+  const safePrefix = sanitizeBucketPrefix(prefix);
+  const listed = await env.FILES.list({
+    prefix: safePrefix || undefined,
+    cursor: cursor ?? undefined,
+    limit: 100,
+  });
+
+  return json({
+    files: listed.objects.map((object) => ({
+      key: object.key,
+      url: `/api/admin/bucket-files/${encodeURIComponent(object.key)}`,
+      size: object.size,
+      uploaded: object.uploaded.toISOString(),
+      contentType: object.httpMetadata?.contentType ?? inferContentTypeFromKey(object.key),
+      group: object.key.startsWith("gallery/") ? "gallery" : object.key.startsWith("orders/") ? "orders" : "other",
+    })),
+    cursor: listed.cursor ?? null,
+    truncated: listed.truncated,
+    prefix: safePrefix,
+  }, 200, env);
+}
+
 async function deleteGalleryImage(env: Env, objectKey: string) {
   const safeKey = decodeURIComponent(objectKey);
   if (!safeKey.startsWith("gallery/")) return json({ error: "Invalid gallery image key" }, 400, env);
+
+  await env.FILES.delete(safeKey);
+
+  return json({ key: safeKey }, 200, env);
+}
+
+async function deleteBucketFile(env: Env, objectKey: string) {
+  const safeKey = sanitizeBucketKey(objectKey);
+  if (!safeKey) return json({ error: "Invalid bucket file key" }, 400, env);
 
   await env.FILES.delete(safeKey);
 
@@ -646,10 +1101,54 @@ async function getGalleryImage(env: Env, objectKey: string) {
 
   return withCors(new Response(object.body, {
     headers: {
-      "content-type": object.httpMetadata?.contentType ?? "application/octet-stream",
+      "content-type": object.httpMetadata?.contentType ?? inferContentTypeFromKey(safeKey) ?? "application/octet-stream",
       "cache-control": "public, max-age=31536000, immutable",
     },
   }), env);
+}
+
+async function getBucketFile(env: Env, objectKey: string) {
+  const safeKey = sanitizeBucketKey(objectKey);
+  if (!safeKey) return json({ error: "Invalid bucket file key" }, 400, env);
+
+  const object = await env.FILES.get(safeKey);
+  if (!object) return json({ error: "Bucket file not found" }, 404, env);
+
+  return withCors(new Response(object.body, {
+    headers: {
+      "content-type": object.httpMetadata?.contentType ?? inferContentTypeFromKey(safeKey) ?? "application/octet-stream",
+      "content-disposition": `inline; filename="${safeFileName(safeKey.split("/").pop() ?? "arquivo")}"`,
+      "cache-control": "private, max-age=60",
+    },
+  }), env);
+}
+
+function inferContentTypeFromKey(objectKey: string) {
+  const extension = objectKey.split(".").pop()?.toLowerCase();
+  const contentTypes: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    gif: "image/gif",
+    svg: "image/svg+xml",
+    pdf: "application/pdf",
+  };
+
+  return extension ? contentTypes[extension] ?? null : null;
+}
+
+function sanitizeBucketPrefix(prefix: string | null) {
+  const value = (prefix ?? "").trim();
+  if (!value || value === "all") return "";
+  if (value === "gallery/" || value === "orders/") return value;
+  return "";
+}
+
+function sanitizeBucketKey(objectKey: string) {
+  const safeKey = decodeURIComponent(objectKey).trim();
+  if (!safeKey || safeKey.startsWith("/") || safeKey.includes("..")) return "";
+  return safeKey;
 }
 
 async function readJson(request: Request) {
@@ -671,8 +1170,8 @@ type GalleryProductRow = {
   included_items: string;
   description: string;
   placeholder: string;
-  static_image: string;
-  hover_image: string | null;
+  static_image_key: string;
+  hover_image_key: string | null;
   surface: string;
   frame_format: string;
   width: number;
@@ -684,18 +1183,82 @@ type GalleryProductRow = {
   updated_at: string;
 };
 
+type OtherProjectRow = GalleryProductRow & {
+  number: string;
+  is_active: number;
+};
+
 type AdminOrderRow = {
   id: string;
   code: string;
   product: string;
   size: string | null;
   colors: string | null;
+  notes: string | null;
   status: string;
+  order_type: string;
+  source: string;
+  expires_at: string | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
   customer_phone: string;
   customer_email: string | null;
+};
+
+type AdminOrderFileRow = {
+  id: string;
+  kind: string;
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+};
+
+type AdminOrderItemRow = {
+  product_id: string | null;
+  title: string;
+  category: string | null;
+  order_type: string | null;
+  price: string | null;
+  dimensions: string | null;
+  quantity: number;
+  notes: string | null;
+  image_url: string | null;
+  sort_order: number;
+};
+
+type OrderRow = AdminOrderRow & {
+  token: string;
+  notes: string | null;
+};
+
+type OrderItemRow = {
+  product_id: string | null;
+  title: string;
+  category: string | null;
+  order_type: string | null;
+  price: string | null;
+  dimensions: string | null;
+  quantity: number;
+  notes: string | null;
+  image_url: string | null;
+  sort_order: number;
+};
+
+type StatusEventRow = {
+  status: string;
+  note: string | null;
+  created_at: string;
+};
+
+type OrderFileRow = {
+  id: string;
+  kind: string;
+  file_name: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
 };
 
 type AdminUserRow = {
@@ -722,6 +1285,7 @@ type OrderItemInput = {
   productId: string | null;
   title: string;
   category: string | null;
+  orderType: string | null;
   price: string | null;
   dimensions: string | null;
   quantity: number;
@@ -741,8 +1305,8 @@ function toGalleryProductResponse(row: GalleryProductRow) {
     includedItems: parseStringArray(row.included_items),
     description: row.description,
     placeholder: row.placeholder,
-    staticImage: row.static_image,
-    hoverImage: row.hover_image,
+    staticImage: galleryImageUrl(row.static_image_key),
+    hoverImage: row.hover_image_key ? galleryImageUrl(row.hover_image_key) : null,
     surface: row.surface,
     frameFormat: row.frame_format,
     width: row.width,
@@ -755,12 +1319,21 @@ function toGalleryProductResponse(row: GalleryProductRow) {
   };
 }
 
+function toOtherProjectResponse(row: OtherProjectRow) {
+  return {
+    ...toGalleryProductResponse(row),
+    number: row.number,
+    isActive: row.is_active === 1,
+  };
+}
+
 function normalizeOrderItems(value: unknown, fallbackBody: Record<string, unknown>): OrderItemInput[] {
   if (!Array.isArray(value) || value.length === 0) {
     return [{
       productId: null,
       title: requireString(fallbackBody.product, "product"),
       category: null,
+      orderType: requireEnum(fallbackBody.orderType ?? inferOrderTypeFromText(requireString(fallbackBody.product, "product")), "orderType", orderTypes),
       price: null,
       dimensions: optionalString(fallbackBody.size),
       quantity: 1,
@@ -781,6 +1354,7 @@ function normalizeOrderItems(value: unknown, fallbackBody: Record<string, unknow
       productId: optionalString(item.productId),
       title: requireString(item.title, `items.${index}.title`),
       category: optionalString(item.category),
+      orderType: optionalOrderType(item.orderType, item),
       price: optionalString(item.price),
       dimensions: optionalString(item.dimensions),
       quantity,
@@ -790,6 +1364,21 @@ function normalizeOrderItems(value: unknown, fallbackBody: Record<string, unknow
   });
 }
 
+function optionalOrderType(value: unknown, item: Record<string, unknown>) {
+  if (typeof value === "string" && orderTypes.includes(value as (typeof orderTypes)[number])) return value;
+  return inferOrderType([{
+    productId: optionalString(item.productId),
+    title: typeof item.title === "string" ? item.title : "",
+    category: optionalString(item.category),
+    orderType: null,
+    price: null,
+    dimensions: null,
+    quantity: 1,
+    notes: null,
+    imageUrl: null,
+  }]);
+}
+
 function summarizeOrderItems(items: OrderItemInput[]) {
   if (items.length === 1) {
     const item = items[0];
@@ -797,6 +1386,30 @@ function summarizeOrderItems(items: OrderItemInput[]) {
   }
 
   return `${items.length} itens: ${items.slice(0, 3).map((item) => item.title).join(", ")}${items.length > 3 ? "..." : ""}`;
+}
+
+function inferOrderType(items: OrderItemInput[]) {
+  const categories = items.map((item) => `${item.productId ?? ""} ${item.category ?? ""} ${item.title}`.toLowerCase());
+
+  if (categories.some((value) => value.includes("maker"))) return "maker";
+  if (categories.every((value) => value.includes("galeria") || value.includes("kit"))) return "galeria";
+  if (categories.every((value) => value.includes("familinha"))) return "familinha";
+
+  return "outros";
+}
+
+function inferOrderTypeFromText(value: string) {
+  return inferOrderType([{
+    productId: null,
+    title: value,
+    category: null,
+    orderType: null,
+    price: null,
+    dimensions: null,
+    quantity: 1,
+    notes: null,
+    imageUrl: null,
+  }]);
 }
 
 function normalizePhone(value: string) {
@@ -849,6 +1462,48 @@ function requireEnum<T extends string>(value: unknown, field: string, allowed: r
   return value as T;
 }
 
+function requireObjectKey(value: unknown, field: string) {
+  const key = objectKeyFromValue(value);
+  if (!key) {
+    throw new Error(`${field} is required`);
+  }
+
+  return key;
+}
+
+function optionalObjectKey(value: unknown) {
+  return objectKeyFromValue(value);
+}
+
+function objectKeyFromValue(value: unknown) {
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const localGalleryPrefix = "/api/gallery-images/";
+  if (trimmed.startsWith(localGalleryPrefix)) {
+    return decodeURIComponent(trimmed.slice(localGalleryPrefix.length));
+  }
+
+  try {
+    const url = new URL(trimmed);
+    const pathPrefix = "/api/gallery-images/";
+    const prefixIndex = url.pathname.indexOf(pathPrefix);
+    if (prefixIndex >= 0) {
+      return decodeURIComponent(url.pathname.slice(prefixIndex + pathPrefix.length));
+    }
+  } catch {
+    // Plain object keys such as "gallery/file.webp" are expected here.
+  }
+
+  return trimmed.replace(/^\/+/, "");
+}
+
+function galleryImageUrl(objectKey: string) {
+  return `/api/gallery-images/${objectKey}`;
+}
+
 function parseStringArray(value: string) {
   try {
     const parsed = JSON.parse(value);
@@ -891,10 +1546,161 @@ function safeFileName(fileName: string) {
   return fileName.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "") || "upload";
 }
 
-function buildWhatsAppUrl(number: string, code: string, product: string) {
+type WhatsAppOrderSummary = {
+  code: string;
+  customerName: string;
+  phone: string;
+  email: string | null;
+  product: string;
+  orderType: string;
+  source: string;
+  size: string | null;
+  colors: string | null;
+  notes: string | null;
+  items: OrderItemInput[];
+  expiresAt: string;
+};
+
+function buildWhatsAppUrl(number: string, summary: WhatsAppOrderSummary) {
   if (!number) return null;
-  const message = encodeURIComponent(`Ola! Acabei de enviar o pedido ${code}: ${product}.`);
-  return `https://wa.me/${number.replace(/\D/g, "")}?text=${message}`;
+
+  const isMakerOrder = summary.orderType === "maker" || summary.source === "maker";
+  const messageLines = isMakerOrder ? buildMakerWhatsAppMessage(summary) : buildCartWhatsAppMessage(summary);
+
+  const message = encodeURIComponent(messageLines.join("\n"));
+  return `https://api.whatsapp.com/send?phone=${number.replace(/\D/g, "")}&text=${message}`;
+}
+
+function buildMakerWhatsAppMessage(summary: WhatsAppOrderSummary) {
+  const note = noteReader(summary.notes);
+  const subtitle = note("Subtitulo");
+  const orientation = note("Orientacao");
+  const background = note("Fundo");
+  const outline = note("Traco");
+  const uploadedFile = note("Arquivo enviado");
+  const designerNotes = note("Observacoes da designer");
+
+  return [
+    `Olá, Maiara! Chegou um novo pedido Maker pelo site: ${summary.code}.`,
+    `Pagamento: aguardando confirmação até ${formatBrazilianDateTime(summary.expiresAt)}.`,
+    "",
+    "Cliente:",
+    `Nome: ${summary.customerName}`,
+    `WhatsApp: ${summary.phone}`,
+    `E-mail: ${summary.email ?? "não informado"}`,
+    "",
+    "Projeto Maker:",
+    `Título: ${summary.product.replace(/^Maker:\s*/i, "") || "não informado"}`,
+    `Subtítulo: ${subtitle ?? "não informado"}`,
+    `Tamanho: ${summary.size ?? "não informado"}`,
+    `Orientação: ${orientation ?? "não informado"}`,
+    `Cores: fundo ${background ?? "não informado"} e traço ${outline ?? "não informado"}`,
+    `Arquivo de referência: ${uploadedFile ?? "cliente enviará pelo WhatsApp"}`,
+    `Observações: ${designerNotes ?? "sem observações"}`,
+    "",
+    "Próximo passo:",
+    "Confirmar o pagamento com a cliente e, depois, alterar o status do pedido para Pago no painel.",
+  ];
+}
+
+function buildCartWhatsAppMessage(summary: WhatsAppOrderSummary) {
+  const typeLabels = Array.from(new Set(summary.items.map((item) => item.orderType ?? summary.orderType).filter(Boolean)))
+    .map((type) => orderTypeLabel(type));
+  const itemLines = summary.items.map((item, index) => {
+    const itemType = orderTypeLabel(item.orderType ?? summary.orderType);
+    const details = [
+      `Tipo: ${itemType}`,
+      item.price ? `Valor: ${item.price}` : null,
+      item.dimensions ? `Tamanho: ${item.dimensions}` : null,
+      item.category ? `Categoria: ${item.category}` : null,
+    ].filter(Boolean).join(" | ");
+
+    return `${index + 1}. ${item.quantity}x ${item.title}${details ? ` (${details})` : ""}${item.notes ? `\n   Observações do item: ${item.notes}` : ""}`;
+  });
+
+  return [
+    `Olá, Maiara! Novo pedido ${summary.code} pelo site.`,
+    `Status: aguardando pagamento até ${formatBrazilianDateTime(summary.expiresAt)}`,
+    `Categoria principal: ${orderTypeLabel(summary.orderType)}`,
+    `Tipos no pedido: ${typeLabels.join(", ") || orderTypeLabel(summary.orderType)}`,
+    `Origem: ${summary.source === "maker" ? "Maker" : "Carrinho"}`,
+    "",
+    "Cliente:",
+    `Nome: ${summary.customerName}`,
+    `WhatsApp: ${summary.phone}`,
+    `E-mail: ${summary.email ?? "não informado"}`,
+    "",
+    "Itens:",
+    ...itemLines,
+    "",
+    "Detalhes:",
+    `Resumo: ${summary.product}`,
+    `Tamanho: ${summary.size ?? "não informado"}`,
+    `Cores: ${summary.colors ?? "não informado"}`,
+    `Observações: ${summary.notes ?? "sem observações"}`,
+    "",
+    "Próximo passo:",
+    "Confirmar pagamento com a cliente e ajustar o status no painel.",
+  ];
+}
+
+function noteReader(notes: string | null) {
+  const values = new Map<string, string>();
+
+  for (const line of (notes ?? "").split("\n")) {
+    const separatorIndex = line.indexOf(":");
+    if (separatorIndex <= 0) continue;
+
+    const key = normalizeNoteKey(line.slice(0, separatorIndex));
+    const value = line.slice(separatorIndex + 1).trim();
+    if (value) values.set(key, value);
+  }
+
+  return (key: string) => values.get(normalizeNoteKey(key));
+}
+
+function normalizeNoteKey(key: string) {
+  return key
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function orderTypeLabel(value: string) {
+  const labels: Record<string, string> = {
+    familinha: "Familinha",
+    maker: "Maker",
+    galeria: "Galeria",
+    outros: "Outros projetos",
+  };
+
+  return labels[value] ?? value;
+}
+
+function formatBrazilianDateTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Cuiaba",
+  }).format(date);
+}
+
+async function deleteExpiredUnpaidOrders(env: Env) {
+  const db = requireDb(env);
+  if (db instanceof Response) return;
+
+  await db.prepare(
+    "DELETE FROM orders WHERE status = 'awaiting_payment' AND expires_at IS NOT NULL AND expires_at <= ?",
+  )
+    .bind(new Date().toISOString())
+    .run();
 }
 
 async function ensureBootstrapAdmin(env: Env, request?: Request) {
@@ -1026,7 +1832,7 @@ function clearAdminSessionCookie(request: Request, env: Env) {
 
 function isSecureRequest(request: Request, env: Env) {
   const url = new URL(request.url);
-  return url.protocol === "https:" || (env.APP_ORIGIN ?? "").startsWith("https://");
+  return url.protocol === "https:";
 }
 
 async function requireAdmin(request: Request, env: Env): Promise<AdminIdentity | Response> {

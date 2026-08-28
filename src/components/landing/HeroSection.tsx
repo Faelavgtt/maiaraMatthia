@@ -62,18 +62,18 @@ export function HeroSection({ phrase }: HeroSectionProps) {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto grid min-h-screen max-w-7xl gap-8 px-5 pb-12 pt-24 sm:pb-16 md:px-8 md:pb-20 md:pt-28 xl:grid-cols-[0.98fr_1.02fr] xl:items-center xl:gap-10 xl:px-5 xl:py-24">
+      <div className="relative z-10 mx-auto grid min-h-[100svh] max-w-7xl gap-6 px-5 pb-10 pt-20 sm:gap-8 sm:px-8 sm:pb-14 sm:pt-24 md:pb-16 xl:grid-cols-[0.98fr_1.02fr] xl:items-center xl:gap-10 xl:px-5 xl:py-24">
         <motion.div className="relative z-10 max-w-[42rem] md:max-w-3xl xl:max-w-[42rem]" variants={textParent} initial="hidden" animate="show">
           <motion.p variants={textItem} className="eyebrow text-white">
             Maiara Mattia · artista visual
           </motion.p>
-          <motion.h1 variants={textItem} className="mt-4 max-w-2xl font-poppins text-4xl font-thin leading-[1.08] text-[#8b4114] sm:mt-5 sm:text-5xl sm:leading-[1.04] lg:text-6xl">
+          <motion.h1 variants={textItem} className="mt-3 max-w-2xl font-poppins text-[2.15rem] font-thin leading-[1.08] text-[#8b4114] sm:mt-5 sm:text-[2.8rem] sm:leading-[1.04] lg:text-[3.45rem] xl:text-6xl">
             Beleza nas pequenas delicadezas do cotidiano.
           </motion.h1>
-          <motion.p variants={textItem} className="mt-5 max-w-xl font-sans text-base font-light leading-7 text-[#8b4114]/85 sm:mt-6 sm:text-xl sm:leading-8">
+          <motion.p variants={textItem} className="mt-4 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/85 sm:mt-5 sm:text-lg sm:leading-7 md:text-xl md:leading-8">
             Sou publicitária e apaixonada por ilustrar, mas, acima de tudo, sou alguém que encontra beleza nas pequenas delicadezas do cotidiano.
           </motion.p>
-          <motion.div variants={textItem} className="mt-6 grid max-w-2xl gap-4 font-sans text-sm font-light leading-6 text-[#8b4114]/82 sm:mt-7 sm:grid-cols-2 sm:text-base sm:leading-7">
+          <motion.div variants={textItem} className="mt-5 grid max-w-2xl gap-3 font-sans text-[0.82rem] font-light leading-5 text-[#8b4114]/82 sm:mt-6 sm:grid-cols-2 sm:gap-4 sm:text-sm sm:leading-6 md:text-base md:leading-7">
             <p className="border-l border-white/45 pl-4 sm:pl-5">
               Meu trabalho nasce da infância, da natureza e das memórias afetivas. Cresce entre flores, folhas, animais, madeira e tons empoeirados.
             </p>
@@ -81,15 +81,15 @@ export function HeroSection({ phrase }: HeroSectionProps) {
               Acredito que a arte pode desacelerar o olhar e despertar lembranças, criando acolhimento, leveza e a sensação de que sempre esteve ali.
             </p>
           </motion.div>
-          <motion.div variants={textItem} className="mt-5 inline-flex max-w-full rounded-full border border-white/45 bg-white/20 px-4 py-2 font-sans text-[0.68rem] font-light uppercase leading-5 tracking-[0.12em] text-[#8b4114]/75 backdrop-blur-sm sm:max-w-xl sm:px-5 sm:text-sm sm:tracking-[0.14em]">
+          <motion.div variants={textItem} className="mt-4 inline-flex max-w-full rounded-full border border-white/45 bg-white/20 px-3 py-2 font-sans text-[0.62rem] font-light uppercase leading-4 tracking-[0.1em] text-[#8b4114]/75 backdrop-blur-sm sm:mt-5 sm:max-w-xl sm:px-5 sm:text-xs sm:tracking-[0.14em] md:text-sm">
             histórias em ilustrações e objetos feitos para durar
           </motion.div>
-          <motion.div variants={textItem} className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
+          <motion.div variants={textItem} className="mt-6 flex flex-col gap-2.5 sm:mt-7 sm:flex-row sm:gap-3">
             <motion.a
               href="#portfolio"
               whileHover={{ y: -3, rotate: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#8b4114] px-5 font-sans text-base font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.16)] sm:px-6 sm:text-lg"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#8b4114] px-5 font-sans text-sm font-medium text-white shadow-[0_12px_26px_rgba(0,0,0,0.16)] sm:h-12 sm:px-6 sm:text-base md:text-lg"
             >
               Conhecer o universo
               <ArrowRight className="h-4 w-4" />
@@ -98,7 +98,7 @@ export function HeroSection({ phrase }: HeroSectionProps) {
               href="#pedido"
               whileHover={{ y: -3, rotate: 1 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex h-12 items-center justify-center rounded-full border border-[#8b4114]/25 bg-white px-5 font-sans text-base font-light text-[#8b4114] sm:px-6 sm:text-lg"
+              className="inline-flex h-11 items-center justify-center rounded-full border border-[#8b4114]/25 bg-white px-5 font-sans text-sm font-light text-[#8b4114] sm:h-12 sm:px-6 sm:text-base md:text-lg"
             >
               Criar comigo
             </motion.a>
@@ -107,7 +107,7 @@ export function HeroSection({ phrase }: HeroSectionProps) {
 
         <div className="relative min-h-0 md:min-h-0 xl:min-h-[620px]">
           <motion.div
-            className="relative mx-auto mt-2 max-w-[300px] sm:max-w-[360px] md:mt-4 md:max-w-[420px] xl:max-w-[470px]"
+            className="relative mx-auto mt-1 max-w-[250px] sm:max-w-[320px] md:mt-3 md:max-w-[380px] lg:max-w-[420px] xl:max-w-[470px]"
             initial={{ opacity: 0, y: 34, rotate: -3, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, rotate: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 95, damping: 15, delay: 0.25 }}

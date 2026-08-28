@@ -1,13 +1,15 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, ChevronLeft, ChevronRight, FolderKanban, Images, Layers3, LogOut, Users } from "lucide-react";
+import { BarChart3, ChevronLeft, ChevronRight, Database, FolderKanban, Images, Layers3, LogOut, PackageOpen, Users } from "lucide-react";
 import { getAdminSession, signOutAdmin, type AdminSession } from "@/lib/admin-auth";
 
 const navigationItems = [
   { label: "Painel", href: "/admin", icon: BarChart3 },
   { label: "Pedidos", href: "/admin/pedidos", icon: FolderKanban },
   { label: "Galeria", href: "/admin/galeria", icon: Layers3 },
+  { label: "Outros projetos", href: "/admin/outros", icon: PackageOpen },
   { label: "Fotos do site", href: "/admin/fotos", icon: Images },
+  { label: "Bucket", href: "/admin/bucket", icon: Database },
   { label: "Usuarios", href: "/admin/usuarios", icon: Users, ownerOnly: true },
 ];
 
@@ -72,7 +74,7 @@ export function AdminLayout() {
 
           {isSidebarOpen && (
             <p className="mt-6 px-3 font-sans text-[0.68rem] font-normal uppercase tracking-[0.18em] text-[#76877e]">
-              Atelie Maiara
+              Ateliê Maiara
             </p>
           )}
 

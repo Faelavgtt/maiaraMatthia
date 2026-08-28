@@ -1,10 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createOrder } from "@/lib/api";
+import type { OrderType } from "@/lib/api";
 
 export type CartItemInput = {
   productId?: string;
   title: string;
   category?: string;
+  orderType?: OrderType;
   price?: string;
   dimensions?: string;
   imageUrl?: string;
@@ -74,14 +76,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => setItems([]), []);
 
   const checkout = useCallback(async (input: CheckoutInput) => {
-    if (items.length === 0) throw new Error("Seu carrinho esta vazio.");
+    if (items.length === 0) throw new Error("Sua sacola está vazia.");
 
     const response = await createOrder({
       ...input,
+      orderType: inferCartOrderType(items),
+      source: "cart",
       items: items.map((item) => ({
         productId: item.productId,
         title: item.title,
         category: item.category,
+        orderType: item.orderType,
         price: item.price,
         dimensions: item.dimensions,
         quantity: item.quantity,
@@ -91,7 +96,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
 
     clearCart();
-    setIsOpen(false);
     return { code: response.code, whatsappUrl: response.whatsappUrl };
   }, [clearCart, items]);
 
@@ -140,4 +144,11 @@ function isCartItem(value: unknown): value is CartItem {
 
 function sameCartItem(item: CartItem, input: CartItemInput) {
   return item.productId === input.productId && item.title === input.title && item.dimensions === input.dimensions;
+}
+
+function inferCartOrderType(items: CartItem[]): OrderType {
+  const types = new Set(items.map((item) => item.orderType).filter(Boolean));
+  if (types.size === 1) return Array.from(types)[0] as OrderType;
+  if (items.every((item) => (item.category ?? "").toLowerCase().includes("galeria"))) return "galeria";
+  return "outros";
 }

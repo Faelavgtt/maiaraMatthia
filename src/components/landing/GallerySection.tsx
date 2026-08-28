@@ -20,6 +20,7 @@ import {
 } from "@/lib/gallery-products";
 import { listGalleryProducts } from "@/lib/api";
 import { useCart } from "@/lib/cart";
+import { buildWhatsappUrl } from "@/lib/whatsapp";
 
 const customGalleryMessage = [
   "Olá! Quero orçar uma galeria personalizada com a Maiara Mattia.",
@@ -32,8 +33,8 @@ const readyGalleryMessage = [
   "Tenho interesse em escolher uma arte pronta e customizar as cores.",
 ].join("\n");
 
-const customGalleryUrl = `https://wa.me/?text=${encodeURIComponent(customGalleryMessage)}`;
-const readyGalleryUrl = `https://wa.me/?text=${encodeURIComponent(readyGalleryMessage)}`;
+const customGalleryUrl = buildWhatsappUrl(customGalleryMessage);
+const readyGalleryUrl = buildWhatsappUrl(readyGalleryMessage);
 const galleryStaticImage = "/image/fotoExemplo.jpeg";
 const galleryHoverImage = "/image/fotoExemplo1.jpeg";
 
@@ -291,7 +292,7 @@ export function GallerySection() {
   }, []);
 
   return (
-    <section id="galeria" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-16 pt-3 sm:px-8 md:pb-20 md:pt-5">
+    <section id="galeria" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 pb-12 pt-3 sm:px-8 md:pb-16 md:pt-5 xl:pb-20">
       
       {/* Background Decorativo */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
@@ -306,7 +307,7 @@ export function GallerySection() {
       </div>
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-6 border-b border-[#8b4114]/12 pb-8 lg:grid-cols-[1fr_0.78fr] lg:items-end">
+        <div className="grid gap-5 border-b border-[#8b4114]/12 pb-6 md:gap-6 md:pb-8 lg:grid-cols-[1fr_0.78fr] lg:items-end">
           
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -320,20 +321,20 @@ export function GallerySection() {
               GALERIAS PRONTAS & KITS
             </div>
 
-            <h2 className="mt-3 font-sans text-3xl font-light leading-tight text-[#8b4114] sm:text-4xl md:text-[2.5rem]">
+            <h2 className="mt-3 font-sans text-[1.85rem] font-light leading-tight text-[#8b4114] sm:text-3xl md:text-[2.35rem] xl:text-[2.5rem]">
               Três quadros que se conversam, mais uma Familinha para fechar a história.
             </h2>
-            <p className="mt-3 max-w-2xl font-sans text-sm font-light leading-relaxed text-[#8b4114]/80 sm:text-base">
+            <p className="mt-3 max-w-2xl font-sans text-sm font-light leading-6 text-[#8b4114]/80 sm:text-base sm:leading-relaxed">
               Explore nossos conjuntos prontos para parede. Clique em qualquer opção para ver os detalhes do kit, dimensões e encomendar o seu conjunto.
             </p>
           </motion.div>
 
-          <div className="relative -rotate-1 rounded-2xl border-2 border-dashed border-[#e6c29c] bg-[#fff9f2] p-5 shadow-sm transition-all duration-300 hover:rotate-0">
+          <div className="relative rounded-xl border-2 border-dashed border-[#e6c29c] bg-[#fff9f2] p-4 shadow-sm transition-all duration-300 hover:rotate-0 sm:-rotate-1 sm:rounded-2xl sm:p-5">
             <span className="inline-flex items-center gap-1.5 font-sans text-[0.68rem] font-semibold uppercase tracking-wider text-[#7d876d]">
               <Heart className="h-3 w-3 fill-[#7d876d]" />
               Pronta ou sob medida?
             </span>
-            <h3 className="mt-1 font-sans text-xl font-normal leading-tight text-[#8b4114]">
+            <h3 className="mt-1 font-sans text-lg font-normal leading-tight text-[#8b4114] sm:text-xl">
               Escolha uma galeria pronta ou peça um projeto exclusivo.
             </h3>
             <p className="mt-2 font-sans text-xs font-light leading-relaxed text-[#8b4114]/75">
@@ -362,7 +363,7 @@ export function GallerySection() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3 sm:mt-6">
           <p className="font-sans text-[0.7rem] font-medium uppercase tracking-wider text-[#8b4114]/60">
             ↔ Arraste a parede para explorar os kits
           </p>
@@ -388,7 +389,7 @@ export function GallerySection() {
         </div>
 
         {/* --- CARROSSEL --- */}
-        <div className="mt-4 rounded-xl bg-[#979f8a] shadow-inner">
+        <div className="mt-3 rounded-xl bg-[#979f8a] shadow-inner sm:mt-4">
           <div
             ref={wallRef}
             onPointerDown={startWallDrag}
@@ -397,7 +398,7 @@ export function GallerySection() {
             onPointerCancel={stopWallDrag}
             onPointerLeave={stopWallDrag}
             onScroll={syncLoopPosition}
-            className="flex min-h-[31rem] cursor-grab select-none items-start gap-9 overflow-x-auto px-10 pb-9 pt-12 active:cursor-grabbing sm:px-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex min-h-[22rem] cursor-grab select-none items-start gap-5 overflow-x-auto px-5 pb-6 pt-8 active:cursor-grabbing sm:min-h-[25rem] sm:gap-7 sm:px-8 sm:pb-8 sm:pt-10 md:min-h-[28rem] md:gap-8 md:px-10 xl:min-h-[31rem] xl:gap-9 xl:px-10 xl:pb-9 xl:pt-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {carouselProjects.map((project, index) => (
               <GalleryFrame 
@@ -412,7 +413,10 @@ export function GallerySection() {
         </div>
 
         {/* Rodapé da Seção */}
-        <div className="mt-6 flex flex-col gap-3 border-t border-[#8b4114]/12 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 border-t border-[#8b4114]/12 pt-4 sm:flex-row sm:items-center sm:justify-between md:mt-6 md:pt-5">
+          <p className="max-w-xl font-sans text-xs font-light leading-5 text-[#8b4114]/65">
+            Quer adaptar tema, cores ou medidas? O orçamento começa com uma mensagem rápida no WhatsApp para entendermos a parede e o estilo desejado.
+          </p>
           <a
             href={customGalleryUrl}
             target="_blank"
@@ -434,6 +438,7 @@ export function GallerySection() {
             productId: project.id,
             title: project.title,
             category: project.category,
+            orderType: "galeria",
             price: project.price,
             dimensions: project.dimensions,
             imageUrl: project.src,

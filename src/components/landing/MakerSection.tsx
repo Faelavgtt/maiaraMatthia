@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactNode } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useState } from "react";
 import { ArrowRight, Check, MessageCircle, Paintbrush, Send, Upload, WandSparkles } from "lucide-react";
 
 const backgroundOptions = [
@@ -71,6 +71,9 @@ const makerProcessSteps = [
   },
 ] as const;
 
+const makerAcceptedFileTypes = new Set(["image/png", "image/jpeg", "application/pdf"]);
+const makerMaxFileBytes = 50 * 1024 * 1024;
+
 type MakerSectionProps = {
   backgroundColor: string;
   outlineColor: string;
@@ -89,7 +92,8 @@ type MakerSectionProps = {
   onSubtitleChange: (value: string) => void;
   onDesignerNotesChange: (value: string) => void;
   onExampleChange: (value: string) => void;
-  onUploadFileNameChange: (value: string) => void;
+  onUploadFileChange: (file: File | null) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
 export function MakerSection({
@@ -110,15 +114,35 @@ export function MakerSection({
   onSubtitleChange,
   onDesignerNotesChange,
   onExampleChange,
-  onUploadFileNameChange,
+  onUploadFileChange,
+  onSubmit,
 }: MakerSectionProps) {
   const selectedBackground = backgroundOptions.find((option) => option.value === backgroundColor)?.name ?? "Personalizado";
   const selectedOutline = outlineOptions.find((option) => option.value === outlineColor)?.name ?? "Personalizado";
   const selectedArtwork = exampleOptions.find((example) => example.id === selectedExample) ?? exampleOptions[0];
+  const previewTitle = title.trim() || selectedArtwork.title;
+  const previewSubtitle = subtitle.trim() || selectedArtwork.subtitle;
+  const [uploadError, setUploadError] = useState("");
 
   const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    onUploadFileNameChange(file?.name ?? "");
+
+    if (file && !makerAcceptedFileTypes.has(file.type)) {
+      event.target.value = "";
+      onUploadFileChange(null);
+      setUploadError("Envie um arquivo PNG, JPG ou PDF.");
+      return;
+    }
+
+    if (file && file.size > makerMaxFileBytes) {
+      event.target.value = "";
+      onUploadFileChange(null);
+      setUploadError("O arquivo precisa ter até 50 MB.");
+      return;
+    }
+
+    setUploadError("");
+    onUploadFileChange(file ?? null);
   };
 
   const selectExample = (example: (typeof exampleOptions)[number]) => {
@@ -141,26 +165,26 @@ export function MakerSection({
           maskSize: "cover",
         }}
       />
-      <div className="relative z-10 mx-auto max-w-screen-2xl px-5 py-5 ">
-        <div className="mb-6 max-w-5xl ">
+      <div className="relative z-10 mx-auto max-w-screen-2xl px-5 py-5 sm:px-8 xl:px-5">
+        <div className="mb-5 max-w-5xl md:mb-6">
           <p className="font-sans text-xs font-normal uppercase tracking-[0.22em] text-white">Maker de pedido</p>
-          <h2 className="mt-1 font-sans text-3xl font-extralight leading-tight text-white md:text-4xl">
+          <h2 className="mt-1 font-sans text-[1.85rem] font-extralight leading-tight text-white sm:text-3xl md:text-[2.2rem] xl:text-4xl">
             Monte a ideia do quadro em poucos cliques.
           </h2>
-          <p className="mt-3 font-sans text-base font-light leading-7 text-white md:text-lg">
+          <p className="mt-2 max-w-4xl font-sans text-sm font-light leading-6 text-white sm:text-base md:text-lg md:leading-7">
             Escolha o fundo, a cor do traço, o formato, o tamanho e envie o desenho da criança. A finalização continua pelo WhatsApp.
           </p>
         </div>
 
-        <div className="grid items-start gap-5 xl:grid-cols-[0.72fr_1.28fr]">
+        <div className="grid items-start gap-4 md:gap-5 xl:grid-cols-[0.72fr_1.28fr]">
           <div>
-            <div className="rounded-xl border border-white/35 bg-white p-4 shadow-[0_18px_48px_rgba(0,0,0,0.12)]">
-              <p className="mb-3 text-center font-sans text-[11px] font-light uppercase tracking-[0.14em] text-[#8b4114]/70">
+            <div className="rounded-xl border border-white/35 bg-white p-3 shadow-[0_18px_48px_rgba(0,0,0,0.12)] sm:p-4">
+              <p className="mb-2 text-center font-sans text-[10px] font-light uppercase tracking-[0.14em] text-[#8b4114]/70 sm:mb-3 sm:text-[11px]">
                 Exemplo de como irá ficar
               </p>
-              <div className="flex min-h-[430px] items-center justify-center rounded-lg bg-[#ddb8a6]/35 p-4">
-                <div className={`rounded-md bg-white shadow-[0_12px_32px_rgba(0,0,0,0.08)] ${orientation === "portrait" ? "w-full max-w-[330px]" : "w-full max-w-[470px]"}`}>
-                  <div className={`bg-white p-5 ${orientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]"}`}>
+              <div className="flex min-h-[300px] items-center justify-center rounded-lg bg-[#ddb8a6]/35 p-3 sm:min-h-[350px] sm:p-4 md:min-h-[390px] xl:min-h-[430px]">
+                <div className={`rounded-md bg-white shadow-[0_12px_32px_rgba(0,0,0,0.08)] ${orientation === "portrait" ? "w-full max-w-[240px] sm:max-w-[285px] xl:max-w-[330px]" : "w-full max-w-[330px] sm:max-w-[390px] xl:max-w-[470px]"}`}>
+                  <div className={`bg-white p-3 sm:p-4 xl:p-5 ${orientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]"}`}>
                     <div className="flex h-full flex-col">
                       <div
                         className="relative flex-1 overflow-hidden"
@@ -168,12 +192,12 @@ export function MakerSection({
                       >
                         <SketchPreview outlineColor={outlineColor} selectedExample={selectedExample} />
                       </div>
-                      <div className="flex min-h-[86px] flex-col items-center justify-center bg-white px-4 py-4 text-center text-black">
-                        <p className="font-poppins text-lg font-normal leading-none tracking-wide">
-                          "{selectedArtwork.title}"
+                      <div className="flex min-h-[66px] flex-col items-center justify-center bg-white px-3 py-3 text-center text-black sm:min-h-[76px] xl:min-h-[86px] xl:px-4 xl:py-4">
+                        <p className="font-poppins text-sm font-normal leading-none tracking-wide sm:text-base xl:text-lg">
+                          "{previewTitle}"
                         </p>
-                        <p className="mt-2 font-poppins text-sm font-normal leading-tight">
-                          {selectedArtwork.subtitle}
+                        <p className="mt-1.5 font-poppins text-xs font-normal leading-tight sm:text-sm xl:mt-2">
+                          {previewSubtitle}
                         </p>
                       </div>
                     </div>
@@ -182,13 +206,13 @@ export function MakerSection({
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <div className="mt-3 flex flex-wrap justify-center gap-2 sm:mt-4">
               {exampleOptions.map((example) => (
                 <button
                   key={example.id}
                   type="button"
                   onClick={() => selectExample(example)}
-                  className={`h-11 rounded-full border px-4 font-sans text-sm font-light ${
+                  className={`h-10 rounded-full border px-3.5 font-sans text-xs font-light sm:h-11 sm:px-4 sm:text-sm ${
                     selectedExample === example.id
                       ? "border-[#8b4114] bg-[#ddb8a6] text-[#8b4114]"
                       : "border-[#ddb8a6] bg-white text-[#8b4114]"
@@ -201,16 +225,39 @@ export function MakerSection({
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/35 bg-white p-4 shadow-[0_18px_48px_rgba(0,0,0,0.10)] md:p-5">
-            <div className="grid gap-x-6 gap-y-1 lg:grid-cols-2 2xl:grid-cols-3">
+          <form onSubmit={onSubmit} className="rounded-xl border border-white/35 bg-white p-3.5 shadow-[0_18px_48px_rgba(0,0,0,0.10)] sm:p-4 md:p-5">
+            <div className="grid gap-x-5 gap-y-0 lg:grid-cols-2 2xl:grid-cols-3">
+            <ConfigBlock title="Contato" className="lg:col-span-2 2xl:col-span-3">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <input
+                  name="customerName"
+                  required
+                  className="h-10 w-full rounded-full border border-[#ddb8a6] px-4 font-sans text-sm font-light outline-none placeholder:text-[#8b4114]/45 focus:border-[#8b4114]"
+                  placeholder="Seu nome"
+                />
+                <input
+                  name="phone"
+                  required
+                  className="h-10 w-full rounded-full border border-[#ddb8a6] px-4 font-sans text-sm font-light outline-none placeholder:text-[#8b4114]/45 focus:border-[#8b4114]"
+                  placeholder="WhatsApp"
+                />
+                <input
+                  name="email"
+                  type="email"
+                  className="h-10 w-full rounded-full border border-[#ddb8a6] px-4 font-sans text-sm font-light outline-none placeholder:text-[#8b4114]/45 focus:border-[#8b4114]"
+                  placeholder="E-mail opcional"
+                />
+              </div>
+            </ConfigBlock>
+
             <ConfigBlock title="Cor do fundo">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {backgroundOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => onBackgroundColorChange(option.value)}
-                    className={`h-10 w-10 rounded-full border ${backgroundColor === option.value ? "border-[#8b4114] ring-2 ring-[#8b4114]/25" : "border-[#ddb8a6]"}`}
+                    className={`h-9 w-9 rounded-full border sm:h-10 sm:w-10 ${backgroundColor === option.value ? "border-[#8b4114] ring-2 ring-[#8b4114]/25" : "border-[#ddb8a6]"}`}
                     style={{ backgroundColor: option.value }}
                     aria-label={`Selecionar fundo ${option.name}`}
                   />
@@ -220,13 +267,13 @@ export function MakerSection({
             </ConfigBlock>
 
             <ConfigBlock title="Cor do traço">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {outlineOptions.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => onOutlineColorChange(option.value)}
-                    className={`h-10 w-10 rounded-full border ${outlineColor === option.value ? "border-[#8b4114] ring-2 ring-[#8b4114]/25" : "border-[#ddb8a6]"}`}
+                    className={`h-9 w-9 rounded-full border sm:h-10 sm:w-10 ${outlineColor === option.value ? "border-[#8b4114] ring-2 ring-[#8b4114]/25" : "border-[#ddb8a6]"}`}
                     style={{ backgroundColor: option.value }}
                     aria-label={`Selecionar traço ${option.name}`}
                     title={option.name}
@@ -254,11 +301,13 @@ export function MakerSection({
             <ConfigBlock title="Título pessoal" className="lg:col-span-2 2xl:col-span-2">
               <div className="grid gap-3 sm:grid-cols-2">
               <input
+                value={title}
                 onChange={(event) => onTitleChange(event.target.value)}
                 className="h-10 w-full rounded-full border border-[#ddb8a6] px-4 font-sans text-sm font-light outline-none placeholder:text-[#8b4114]/45 focus:border-[#8b4114]"
                 placeholder="Ex: O mundo da Lia"
               />
               <input
+                value={subtitle}
                 onChange={(event) => onSubtitleChange(event.target.value)}
                 className="h-10 w-full rounded-full border border-[#ddb8a6] px-4 font-sans text-sm font-light outline-none placeholder:text-[#8b4114]/45 focus:border-[#8b4114]"
                 placeholder="Ex: primeiro desenho de 2026"
@@ -270,8 +319,11 @@ export function MakerSection({
               <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#8b4114]/50 bg-[#ddb8a6]/45 px-4 py-3 text-center font-sans text-xs font-light text-[#8b4114]">
                 <Upload className="h-4 w-4 shrink-0" />
                 {uploadFileName || "Enviar foto do desenho"}
-                <input type="file" accept="image/*,.pdf" className="sr-only" onChange={handleUpload} />
+                <input type="file" accept=".png,.jpg,.jpeg,.pdf,image/png,image/jpeg,application/pdf" required className="sr-only" onChange={handleUpload} />
               </label>
+              <p className={`mt-2 font-sans text-[11px] font-light leading-snug ${uploadError ? "text-red-700" : "text-[#8b4114]/70"}`}>
+                {uploadError || "PNG, JPG ou PDF. Limite máximo: 50 MB por arquivo."}
+              </p>
             </ConfigBlock>
 
             <ConfigBlock title="Info para a designer" className="2xl:col-span-2">
@@ -292,24 +344,24 @@ export function MakerSection({
               </div>
             </ConfigBlock>
 
-            <div className="flex justify-end pt-3 lg:col-span-2 2xl:col-span-3 z-10">
-              <a
-                href="#pedido"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#8b4114] px-5 font-sans text-xs font-medium text-white shadow-[0_10px_20px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5"
+            <div className="z-10 flex justify-end pt-3 lg:col-span-2 2xl:col-span-3">
+              <button
+                type="submit"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#8b4114] px-5 font-sans text-xs font-medium text-white shadow-[0_10px_20px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-0.5 sm:w-auto"
               >
                 Enviar pedido
                 <Send className="h-4 w-4" />
-              </a>
+              </button>
             </div>
             </div>
-          </div>
+          </form>
         </div>
 
-        <div className="mt-8 border-t border-white/25 pt-7">
+        <div className="mt-7 border-t border-white/25 pt-6 md:mt-8 md:pt-7">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
               <p className="font-sans text-xs font-normal uppercase tracking-[0.22em] text-white">Como funciona</p>
-              <h2 className="mt-2 max-w-2xl font-sans text-2xl font-extralight leading-tight text-white md:text-3xl">
+              <h2 className="mt-2 max-w-2xl font-sans text-[1.6rem] font-extralight leading-tight text-white sm:text-2xl md:text-3xl">
                 Do rabisco espontâneo ao quadro pronto para guardar.
               </h2>
             </div>
@@ -319,17 +371,17 @@ export function MakerSection({
             </a>
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 md:mt-5 md:grid-cols-4">
             {makerProcessSteps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <article key={step.title} className="rounded-xl border border-white/35 bg-white p-4 text-[#8b4114] shadow-[0_12px_30px_rgba(0,0,0,0.07)]">
+                <article key={step.title} className="rounded-xl border border-white/35 bg-white p-3.5 text-[#8b4114] shadow-[0_12px_30px_rgba(0,0,0,0.07)] sm:p-4">
                   <span className="font-sans text-xs font-light text-[#7d876d]">0{index + 1}</span>
-                  <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#ddb8a6] bg-[#ddb8a6]/45 text-[#8b4114]">
+                  <div className="mt-3 flex h-9 w-9 items-center justify-center rounded-full border border-[#ddb8a6] bg-[#ddb8a6]/45 text-[#8b4114] sm:mt-4 sm:h-10 sm:w-10">
                     <Icon className="h-4 w-4" />
                   </div>
-                  <h3 className="mt-4 font-sans text-xl font-light leading-tight text-[#8b4114]">{step.title}</h3>
-                  <p className="mt-2 font-sans text-sm font-light leading-6 text-[#8b4114]">{step.text}</p>
+                  <h3 className="mt-3 font-sans text-base font-light leading-tight text-[#8b4114] sm:mt-4 sm:text-lg xl:text-xl">{step.title}</h3>
+                  <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114] sm:text-sm sm:leading-6">{step.text}</p>
                 </article>
               );
             })}

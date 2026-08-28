@@ -92,7 +92,7 @@
   }
 
   .section-shell {
-    @apply px-5 py-16 md:py-20;
+    @apply px-5 py-12 sm:px-8 md:py-16 xl:px-5 xl:py-20;
   }
 
   .soft-card {
@@ -105,6 +105,25 @@
 
   .eyebrow {
     @apply font-sans text-xs font-normal uppercase tracking-[0.22em] text-[#7d876d];
+  }
+}
+
+.responsive-section-title {
+  @apply font-sans text-[1.85rem] font-extralight leading-[1.12] text-[#8b4114] sm:text-3xl md:text-[2.25rem];
+}
+
+.responsive-copy {
+  @apply font-sans text-sm font-light leading-6 sm:text-base sm:leading-7;
+}
+
+@media (max-width: 767px) {
+  .mobile-compact-card {
+    border-radius: 0.85rem;
+    padding: 1rem;
+  }
+
+  .mobile-soften-tilt {
+    transform: none !important;
   }
 }
 

@@ -98,7 +98,7 @@ const cardStyles = [
 
 export function ServicesSection() {
   return (
-    <section id="servicos" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 py-14 sm:px-8 md:py-16 lg:py-14">
+    <section id="servicos" className="relative isolate overflow-hidden bg-[#faf4ed] px-5 py-12 sm:px-8 md:py-14 lg:py-14 xl:py-16">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(#8b4114_0.75px,transparent_0.75px)] [background-size:24px_24px] opacity-[0.06]" />
         <div className="absolute right-[-8%] top-1/3 h-80 w-80 rounded-full bg-[#dbe3c9]/35 blur-3xl" />
@@ -106,8 +106,8 @@ export function ServicesSection() {
         <Star className="absolute bottom-20 right-[6%] h-8 w-8 -rotate-12 fill-[#8b4114] text-[#8b4114]/80" />
       </div>
 
-      <div className="mx-auto grid max-w-[88rem] gap-8 lg:grid-cols-[0.3fr_0.7fr] lg:items-start lg:gap-9">
-        <div className="relative min-w-0 max-w-full rounded-[2.5rem_1.25rem_2.75rem_1.5rem] border border-[#8b4114]/10 bg-white p-5 text-[#8b4114] shadow-[0_18px_45px_rgba(54,67,64,0.10)] sm:-rotate-[1deg] sm:p-6 lg:sticky lg:top-20">
+      <div className="mx-auto grid max-w-[88rem] gap-6 md:gap-8 lg:grid-cols-[0.3fr_0.7fr] lg:items-start lg:gap-9">
+        <div className="relative min-w-0 max-w-full rounded-xl border border-[#8b4114]/10 bg-white p-4 text-[#8b4114] shadow-[0_18px_45px_rgba(54,67,64,0.10)] sm:-rotate-[1deg] sm:rounded-[2.5rem_1.25rem_2.75rem_1.5rem] sm:p-6 lg:sticky lg:top-20">
           <span className="absolute -top-3 left-1/2 h-7 w-24 -translate-x-1/2 rotate-2 bg-[#d6bea1]/55 backdrop-blur-[1px]" aria-hidden="true" />
           <span className="absolute -right-3 top-24 h-5 w-5 rounded-full bg-[#7d876d]" aria-hidden="true" />
           <span className="absolute -right-7 top-16 h-3 w-3 rounded-full bg-[#ddb8a6]" aria-hidden="true" />
@@ -115,7 +115,7 @@ export function ServicesSection() {
             <Brush className="h-3.5 w-3.5" aria-hidden="true" />
             Serviços do ateliê
           </p>
-          <h2 className="mt-3 max-w-xl font-sans text-[1.85rem] font-extralight leading-[1.15] text-[#8b4114] sm:text-[2rem]">
+          <h2 className="mt-3 max-w-xl font-sans text-[1.7rem] font-extralight leading-[1.15] text-[#8b4114] sm:text-[2rem]">
             Encomendas com pista, história e um tantinho de{" "}
             <span className="relative inline-block whitespace-nowrap">
               brincadeira.
@@ -128,7 +128,7 @@ export function ServicesSection() {
             Cada pedido começa no detalhe: um desenho da criança, uma frase da família, uma flor do jardim, uma lembrança que merece ficar visível.
           </p>
 
-          <div className="mt-6 rounded-[1.5rem_0.8rem_1.5rem_0.8rem] bg-[#f8f1e9] p-4">
+          <div className="mt-5 rounded-xl bg-[#f8f1e9] p-3.5 sm:mt-6 sm:rounded-[1.5rem_0.8rem_1.5rem_0.8rem] sm:p-4">
             <p className="font-sans text-[0.68rem] font-normal uppercase tracking-[0.18em] text-[#76877e]">
               Como nasce
             </p>
@@ -154,7 +154,7 @@ export function ServicesSection() {
               return (
                 <article
                   key={service.title}
-                  className={`group relative flex min-w-[82vw] snap-center flex-col overflow-hidden rounded-[1.6rem_1rem_1.9rem_1.1rem] border border-[#8b4114]/10 bg-white p-5 shadow-[0_16px_35px_rgba(54,67,64,0.09)] transition-[transform,box-shadow] duration-300 hover:z-10 hover:rotate-0 hover:-translate-y-1 hover:shadow-[0_22px_44px_rgba(54,67,64,0.14)] sm:min-w-0 sm:p-5 lg:min-h-[292px] xl:min-h-[276px] ${style.card}`}
+                  className={`group relative flex min-w-[78vw] snap-center flex-col overflow-hidden rounded-xl border border-[#8b4114]/10 bg-white p-4 shadow-[0_16px_35px_rgba(54,67,64,0.09)] transition-[transform,box-shadow] duration-300 hover:z-10 hover:rotate-0 hover:-translate-y-1 hover:shadow-[0_22px_44px_rgba(54,67,64,0.14)] sm:min-w-0 sm:rounded-[1.6rem_1rem_1.9rem_1.1rem] sm:p-5 lg:min-h-[292px] xl:min-h-[276px] ${style.card}`}
                 >
                   
                   <span className={`absolute bottom-5 right-5 h-2.5 w-2.5 rounded-full ${style.color}`} aria-hidden="true" />

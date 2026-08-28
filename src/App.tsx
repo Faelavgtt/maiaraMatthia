@@ -13,6 +13,8 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminOrders from "./pages/AdminOrders";
 import AdminPhotos from "./pages/AdminPhotos";
 import AdminGalleryProducts from "./pages/AdminGalleryProducts";
+import AdminOtherProjects from "./pages/AdminOtherProjects";
+import AdminBucket from "./pages/AdminBucket";
 import AdminUsers from "./pages/AdminUsers";
 import OrderStatus from "./pages/OrderStatus";
 import NotFound from "./pages/NotFound";
@@ -35,7 +37,9 @@ const App = () => (
                 <Route index element={<Admin />} />
                 <Route path="pedidos" element={<AdminOrders />} />
                 <Route path="galeria" element={<AdminGalleryProducts />} />
+                <Route path="outros" element={<AdminOtherProjects />} />
                 <Route path="fotos" element={<AdminPhotos />} />
+                <Route path="bucket" element={<AdminBucket />} />
                 <Route path="usuarios" element={<AdminUsers />} />
               </Route>
             </Route>

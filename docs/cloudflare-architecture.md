@@ -1,7 +1,7 @@
 # Arquitetura Cloudflare
 
 Este projeto pode rodar com o front em Cloudflare Pages/Workers Static Assets e a API em Cloudflare Workers.
-A base de dados principal sera um D1 geral do projeto, com tabelas por modulo. A primeira etapa usa a tabela da galeria.
+A base de dados principal e um D1 geral do projeto, com tabelas por modulo: galeria, outros projetos, imagens do site, feedbacks, pedidos e administracao.
 
 ## Componentes
 
@@ -16,6 +16,8 @@ A base de dados principal sera um D1 geral do projeto, com tabelas por modulo. A
 
 - `wrangler.toml`: configuracao base do Worker, assets estaticos e R2.
 - `worker/src/index.ts`: rotas da API e conexao com D1/R2.
+- `worker/schema.sql`: SQL consolidado para colar no Console do D1 quando quiser criar tudo pelo painel.
+- `worker/migrations/`: migrations versionadas para local e producao ficarem iguais.
 
 ## Rotas da API
 
@@ -53,7 +55,7 @@ migrations_dir = "worker/migrations"
 
 O binding precisa ser `DB`, porque ele representa o banco geral do Worker.
 
-3. Aplicar a primeira migration, que cria a tabela da galeria:
+3. Aplicar as migrations, que criam todas as tabelas:
 
 ```bash
 npx wrangler d1 migrations apply maiara-db --remote
@@ -64,6 +66,9 @@ Para testar localmente:
 ```bash
 npx wrangler d1 migrations apply maiara-db --local
 ```
+
+Se estiver no Console do D1, cole o conteudo de `worker/schema.sql`.
+As tabelas devem comecar vazias; os conteudos serao cadastrados pelo painel/admin.
 
 ## Storage geral
 
@@ -89,9 +94,10 @@ Configure em Cloudflare Workers:
 ## Primeiro deploy
 
 1. Criar o bucket R2.
-2. Rodar `npm run build`.
-3. Publicar o Worker com `npx wrangler deploy`.
-4. Configurar Cloudflare Access para `/admin`.
+2. Criar/apontar o D1 `maiara-db`.
+3. Aplicar as migrations.
+4. Rodar `npm run build`.
+5. Publicar o Worker com `npx wrangler deploy`.
 
 ## Proximo passo no front
 

@@ -1,9 +1,14 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
+export type OrderType = "familinha" | "maker" | "galeria" | "outros";
+export type OrderSource = "cart" | "maker";
+
 export type CreateOrderInput = {
   customerName: string;
   phone: string;
   email?: string;
+  orderType?: OrderType;
+  source?: OrderSource;
   product?: string;
   size?: string;
   colors?: string;
@@ -12,6 +17,7 @@ export type CreateOrderInput = {
     productId?: string;
     title: string;
     category?: string;
+    orderType?: OrderType;
     price?: string;
     dimensions?: string;
     quantity: number;
@@ -50,6 +56,11 @@ export type GalleryProductApiRow = {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type OtherProjectApiRow = GalleryProductApiRow & {
+  number: string;
+  isActive: boolean;
 };
 
 export async function createOrder(input: CreateOrderInput) {
@@ -91,6 +102,16 @@ export async function listGalleryProducts() {
   }
 
   return response.json() as Promise<{ products: GalleryProductApiRow[] }>;
+}
+
+export async function listOtherProjects() {
+  const response = await fetch(`${apiBaseUrl}/api/other-projects`);
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response));
+  }
+
+  return response.json() as Promise<{ products: OtherProjectApiRow[] }>;
 }
 
 async function readApiError(response: Response) {

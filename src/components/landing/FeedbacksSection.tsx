@@ -11,7 +11,7 @@ const feedbacks = [
     rotate: "-rotate-[1.5deg]",
   },
   {
-    name: "Mae do Theo",
+    name: "Mãe do Theo",
     note: "A arte chegou cheia de afeto. Virou o presente mais especial da festa.",
     src: "/image/feedbacks/feedback2.png",
     color: "bg-[#e4e7d9]",
@@ -20,14 +20,14 @@ const feedbacks = [
   },
   {
     name: "Familia da Helena",
-    note: "Todo mundo reconheceu os detalhes. Parece uma lembranca desenhada.",
+    note: "Todo mundo reconheceu os detalhes. Parece uma lembrança desenhada.",
     src: "/image/feedbacks/feedback3.png",
     color: "bg-[#f9e7d6]",
     tape: "bg-[#ddb8a6]",
     rotate: "-rotate-[0.75deg]",
   },
   {
-    name: "Mae do Bento",
+    name: "Mãe do Bento",
     note: "O desenho dele virou um quadro lindo, sem perder a espontaneidade.",
     src: "/image/feedbacks/feedback4.png",
     color: "bg-[#d19c88]",
@@ -36,7 +36,7 @@ const feedbacks = [
   },
   {
     name: "Familia da Alice",
-    note: "Foi uma surpresa linda ver a historia dela aparecer em cada detalhe.",
+    note: "Foi uma surpresa linda ver a história dela aparecer em cada detalhe.",
     src: "/image/feedbacks/feedback5.png",
     color: "bg-[#7d876d]",
     tape: "bg-[#f9e7d6]",
@@ -46,7 +46,7 @@ const feedbacks = [
 
 export function FeedbacksSection() {
   return (
-    <section id="feedbacks" className="relative isolate overflow-hidden bg-[#d19c88] px-5 py-14 text-[#8b4114] sm:px-8 md:py-16 lg:py-20">
+    <section id="feedbacks" className="relative isolate overflow-hidden bg-[#d19c88] px-5 py-12 text-[#8b4114] sm:px-8 md:py-16 xl:py-20">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <img
           src="/image/elementosFloral/floral1.png"
@@ -72,17 +72,17 @@ export function FeedbacksSection() {
               <MessageCircleHeart className="h-3.5 w-3.5" aria-hidden="true" />
               Feedbacks
             </p>
-            <h2 className="mt-3 max-w-3xl font-sans text-3xl font-extralight leading-tight text-[#8b4114] sm:text-4xl md:text-[2.8rem]">
-              Recadinhos que chegam com sorriso, cor e memoria boa.
+            <h2 className="mt-3 max-w-3xl font-sans text-[1.85rem] font-extralight leading-tight text-[#8b4114] sm:text-4xl md:text-[2.55rem] xl:text-[2.8rem]">
+              Recadinhos que chegam com sorriso, cor e memória boa.
             </h2>
           </div>
 
           <p className="max-w-2xl font-sans text-sm font-light leading-6 text-[#8b4114]/78 sm:text-base sm:leading-7 lg:justify-self-end">
-            um pedacinho da historia depois que a arte chega: a surpresa, o carinho da familia e aquele detalhe pequeno que fez tudo fazer sentido.
+            Um pedacinho da história depois que a arte chega: a surpresa, o carinho da família e aquele detalhe pequeno que fez tudo fazer sentido.
           </p>
         </div>
 
-        <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-7 grid grid-cols-2 gap-4 sm:mt-9 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
           {feedbacks.map((feedback, index) => (
             <FeedbackCard key={feedback.name} feedback={feedback} index={index} />
           ))}
@@ -98,12 +98,12 @@ function FeedbackCard({ feedback, index }: { feedback: (typeof feedbacks)[number
 
   return (
     <article
-      className={`group relative rounded-[1.7rem_1rem_2rem_1.1rem] shadow-[0_18px_38px_rgba(93,51,29,0.15)] transition-transform duration-300 hover:-translate-y-1 hover:rotate-0 ${feedback.rotate}`}
+      className={`group relative rounded-[1.2rem] shadow-[0_18px_38px_rgba(93,51,29,0.15)] transition-transform duration-300 hover:-translate-y-1 hover:rotate-0 sm:rounded-[1.7rem_1rem_2rem_1.1rem] ${feedback.rotate}`}
     >
-      <span className={`absolute left-1/2 -top-5 z-20 h-7 w-24 -translate-x-1/2 ${feedback.tape} opacity-90 shadow-sm ${index % 2 === 0 ? "rotate-2" : "-rotate-2"}`} aria-hidden="true" />
+      <span className={`absolute left-1/2 -top-3 z-20 h-5 w-16 -translate-x-1/2 ${feedback.tape} opacity-90 shadow-sm sm:-top-5 sm:h-7 sm:w-24 ${index % 2 === 0 ? "rotate-2" : "-rotate-2"}`} aria-hidden="true" />
 
-      <div className="rounded-[1.7rem_1rem_2rem_1.1rem] bg-[#fffaf5] p-[5px] shadow-[inset_0_0_0_1px_rgba(139,65,20,0.08)]">
-        <div className="relative aspect-[9/14] overflow-hidden rounded-[1.35rem_0.7rem_1.65rem_0.8rem] bg-[#f8f1e9]">
+      <div className="rounded-[1.2rem] bg-[#fffaf5] p-1 shadow-[inset_0_0_0_1px_rgba(139,65,20,0.08)] sm:rounded-[1.7rem_1rem_2rem_1.1rem] sm:p-[5px]">
+        <div className="relative aspect-[9/13] overflow-hidden rounded-[0.95rem] bg-[#f8f1e9] sm:aspect-[9/14] sm:rounded-[1.35rem_0.7rem_1.65rem_0.8rem]">
           {!imageMissing && (
             <img
               src={feedback.src}

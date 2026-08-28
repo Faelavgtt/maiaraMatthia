@@ -63,7 +63,7 @@ const AdminLogin = () => {
       await signInAdmin(login, password);
       navigate(from, { replace: true });
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Nao foi possivel entrar.");
+      setError(error instanceof Error ? error.message : "Não foi possível entrar.");
     } finally {
       setIsSubmitting(false);
     }
@@ -126,7 +126,7 @@ const AdminLogin = () => {
             Um cantinho reservado para cuidar dos projetos.
           </h1>
           <p className="mt-4 max-w-xl font-sans text-sm font-light leading-6 text-[#8b4114]/82 sm:mt-5 sm:text-lg sm:leading-8">
-            Entre para acompanhar orcamentos, organizar conversas e guardar cada etapa com a mesma delicadeza do atelie.
+            Entre para acompanhar orçamentos, organizar conversas e guardar cada etapa com a mesma delicadeza do ateliê.
           </p>
 
           <div className="mt-7 hidden max-w-lg gap-3 sm:grid sm:grid-cols-2">
@@ -135,7 +135,7 @@ const AdminLogin = () => {
               <p className="mt-3 font-sans text-xs font-light leading-5 text-[#8b4114]/78">Orcamentos, pedidos e contatos em um fluxo simples.</p>
             </div>
             <div className="rotate-1 rounded-[1rem_1.5rem_1rem_1.7rem] border border-white/45 bg-[#f9e7d6]/50 p-4 backdrop-blur-sm">
-              <p className="font-sans text-xs font-normal uppercase tracking-[0.14em] text-[#76877e]">Atelie online</p>
+              <p className="font-sans text-xs font-normal uppercase tracking-[0.14em] text-[#76877e]">Ateliê online</p>
               <p className="mt-2 font-sans text-xs font-light leading-5 text-[#8b4114]/78">Acesso interno para organizar a parte silenciosa do trabalho.</p>
             </div>
           </div>
@@ -195,7 +195,7 @@ const AdminLogin = () => {
             </button>
 
             <p className="rounded-md bg-[#f8f1e9] px-3 py-2 text-center font-sans text-xs font-light leading-5 text-[#8b4114]/70">
-              Se voce ainda nao tem acesso, peca para o administrador principal criar seu usuario.
+              Se você ainda não tem acesso, peça para o administrador principal criar seu usuário.
             </p>
           </form>
         </section>
