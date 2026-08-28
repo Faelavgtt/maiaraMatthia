@@ -7,7 +7,7 @@ APP_ORIGIN = "https://maiaramatthia.rafavergottii.workers.dev"
 ADMIN_OWNER_USERNAME = "admin"
 ADMIN_OWNER_EMAIL = ""
 ADMIN_OWNER_PASSWORD = ""
-WHATSAPP_NUMBER = "5567991939487"
+WHATSAPP_NUMBER = "556784031367"
 
 [triggers]
 crons = ["0 * * * *"]

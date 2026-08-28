@@ -1389,6 +1389,12 @@ function summarizeOrderItems(items: OrderItemInput[]) {
 }
 
 function inferOrderType(items: OrderItemInput[]) {
+  const explicitTypes = items.map((item) => item.orderType).filter(Boolean);
+  const uniqueExplicitTypes = Array.from(new Set(explicitTypes));
+
+  if (uniqueExplicitTypes.length === 1) return uniqueExplicitTypes[0];
+  if (uniqueExplicitTypes.length > 1) return "outros";
+
   const categories = items.map((item) => `${item.productId ?? ""} ${item.category ?? ""} ${item.title}`.toLowerCase());
 
   if (categories.some((value) => value.includes("maker"))) return "maker";
